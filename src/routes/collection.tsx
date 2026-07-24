@@ -137,3 +137,4 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
     </div>
   );
 }
+
