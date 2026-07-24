@@ -5,11 +5,11 @@ import { dict } from "@/data/i18n";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const NAV: Array<{ to: "/" | "/discover" | "/collection" | "/route" | "/case-study"; key: keyof typeof dict.en.nav }> = [
+const NAV: Array<{ to: "/" | "/discover" | "/collection" | "/itinerary" | "/case-study"; key: keyof typeof dict.en.nav }> = [
   { to: "/", key: "home" },
   { to: "/discover", key: "discover" },
   { to: "/collection", key: "collection" },
-  { to: "/route", key: "route" },
+  { to: "/itinerary", key: "route" },
   { to: "/case-study", key: "caseStudy" },
 ];
 

@@ -59,7 +59,7 @@ function Discover() {
             <Button
               size="sm"
               className="bg-leaf text-leaf-foreground hover:bg-leaf/90"
-              onClick={() => navigate({ to: "/route" })}
+              onClick={() => navigate({ to: "/itinerary" })}
             >
               Build route
               <ArrowRight className="h-4 w-4 ml-1" />

@@ -67,7 +67,7 @@ function Collection() {
           onClick={() => {
             const ids = saved.slice(0, 4).map((p) => p.id);
             setRoute(ids);
-            nav({ to: "/route" });
+            nav({ to: "/itinerary" });
           }}
         >
           {t.collection.buildRoute}
