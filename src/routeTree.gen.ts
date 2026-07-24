@@ -9,8 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ItineraryRouteImport } from './routes/itinerary'
+import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as CollectionRouteImport } from './routes/collection'
+import { Route as CaseStudyRouteImport } from './routes/case-study'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ItineraryRoute = ItineraryRouteImport.update({
+  id: '/itinerary',
+  path: '/itinerary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectionRoute = CollectionRouteImport.update({
+  id: '/collection',
+  path: '/collection',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaseStudyRoute = CaseStudyRouteImport.update({
+  id: '/case-study',
+  path: '/case-study',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +43,78 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/case-study': typeof CaseStudyRoute
+  '/collection': typeof CollectionRoute
+  '/discover': typeof DiscoverRoute
+  '/itinerary': typeof ItineraryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/case-study': typeof CaseStudyRoute
+  '/collection': typeof CollectionRoute
+  '/discover': typeof DiscoverRoute
+  '/itinerary': typeof ItineraryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/case-study': typeof CaseStudyRoute
+  '/collection': typeof CollectionRoute
+  '/discover': typeof DiscoverRoute
+  '/itinerary': typeof ItineraryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/case-study' | '/collection' | '/discover' | '/itinerary'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/case-study' | '/collection' | '/discover' | '/itinerary'
+  id:
+    | '__root__'
+    | '/'
+    | '/case-study'
+    | '/collection'
+    | '/discover'
+    | '/itinerary'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CaseStudyRoute: typeof CaseStudyRoute
+  CollectionRoute: typeof CollectionRoute
+  DiscoverRoute: typeof DiscoverRoute
+  ItineraryRoute: typeof ItineraryRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/itinerary': {
+      id: '/itinerary'
+      path: '/itinerary'
+      fullPath: '/itinerary'
+      preLoaderRoute: typeof ItineraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collection': {
+      id: '/collection'
+      path: '/collection'
+      fullPath: '/collection'
+      preLoaderRoute: typeof CollectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/case-study': {
+      id: '/case-study'
+      path: '/case-study'
+      fullPath: '/case-study'
+      preLoaderRoute: typeof CaseStudyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +127,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CaseStudyRoute: CaseStudyRoute,
+  CollectionRoute: CollectionRoute,
+  DiscoverRoute: DiscoverRoute,
+  ItineraryRoute: ItineraryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

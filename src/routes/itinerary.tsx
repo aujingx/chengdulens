@@ -7,7 +7,7 @@ import { dict } from "@/data/i18n";
 import { CloudRain, MapPin, Clock, Footprints, RotateCcw, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("")({
+export const Route = createFileRoute("/itinerary")({
   head: () => ({
     meta: [
       { title: "Route — Chengdu Lens" },
