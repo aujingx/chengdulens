@@ -52,7 +52,7 @@
 **Detail Sheet 抽屉重做**：从右侧全高抽屉滑出，分区展示：
 Hero 图 → 快速信息条（票价 / 时长 / 地铁） → 深度介绍 → 周边推荐（横向卡片） → 门票预约按钮 → 评估指标（Personal Fit / Evidence 折叠在最下）。
 
-## 四、视觉重做（等你选方向）
+## 四、视觉重做
 
 计划截取当前 Discover 页作为参考，生成 3 个 refined 视觉方向，锁定当前的暖橘/草绿/晴空蓝配色 + Outfit/Figtree 字体，让你挑一个再实施。三个方向的差异化：
 
@@ -60,8 +60,7 @@ Hero 图 → 快速信息条（票价 / 时长 / 地铁） → 深度介绍 → 
 - **B · Warm Concierge**：柔和圆角、暖阳阴影、每张卡片带一枚 emoji tag + 3 条 quick facts（🎫 免费 · 🚇 2min · 📸 photogenic）。
 - **C · Bento Grid**：不等大方格、封面景点占大格、其余小格，密度高但节奏清晰，快速扫读。
 
-## 五、卡片精简（现在文字太多）
-
+## 五、卡片精简
 **移除**：Evidence grade 徽章、双评分条、风险警告文案、Not for me 按钮、View detail 链接。
 
 **保留 & 优化**：图片、名称（中英）、类型 + 区域、**一句话 why fits**、Save 按钮、3 个 quick fact 图标（票价/时长/室内外）。
