@@ -11,7 +11,6 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "@/components/AppHeader";
-import { AgentDock } from "@/components/AgentDock";
 
 function NotFoundComponent() {
   return (
@@ -66,15 +65,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Chengdu Lens — an AI city guide for your afternoon" },
+      { title: "Chengdu Lens — an AI travel companion for Chengdu" },
       {
         name: "description",
         content:
-          "Chengdu Lens turns your taste into a walkable, source-checked half-day in Chengdu — with a rain-ready plan B.",
+          "Chengdu Lens is an AI concierge that turns your taste into a walkable half-day in Chengdu — with real tickets, transit, nearby food, and a rain-ready plan B.",
       },
       { name: "author", content: "Chengdu Lens" },
       { property: "og:title", content: "Chengdu Lens" },
-      { property: "og:description", content: "An AI city guide for first-time visitors to Chengdu." },
+      { property: "og:description", content: "AI travel companion for first-time visitors to Chengdu." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -113,12 +112,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-background">
         <AppHeader />
         <main className="flex-1">
           <Outlet />
         </main>
-        <AgentDock />
       </div>
     </QueryClientProvider>
   );

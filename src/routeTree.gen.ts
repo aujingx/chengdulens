@@ -9,112 +9,48 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ItineraryRouteImport } from './routes/itinerary'
-import { Route as DiscoverRouteImport } from './routes/discover'
-import { Route as CollectionRouteImport } from './routes/collection'
-import { Route as CaseStudyRouteImport } from './routes/case-study'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 
-const ItineraryRoute = ItineraryRouteImport.update({
-  id: '/itinerary',
-  path: '/itinerary',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DiscoverRoute = DiscoverRouteImport.update({
-  id: '/discover',
-  path: '/discover',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CollectionRoute = CollectionRouteImport.update({
-  id: '/collection',
-  path: '/collection',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaseStudyRoute = CaseStudyRouteImport.update({
-  id: '/case-study',
-  path: '/case-study',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/case-study': typeof CaseStudyRoute
-  '/collection': typeof CollectionRoute
-  '/discover': typeof DiscoverRoute
-  '/itinerary': typeof ItineraryRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/case-study': typeof CaseStudyRoute
-  '/collection': typeof CollectionRoute
-  '/discover': typeof DiscoverRoute
-  '/itinerary': typeof ItineraryRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/case-study': typeof CaseStudyRoute
-  '/collection': typeof CollectionRoute
-  '/discover': typeof DiscoverRoute
-  '/itinerary': typeof ItineraryRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/case-study' | '/collection' | '/discover' | '/itinerary'
+  fullPaths: '/' | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/case-study' | '/collection' | '/discover' | '/itinerary'
-  id:
-    | '__root__'
-    | '/'
-    | '/case-study'
-    | '/collection'
-    | '/discover'
-    | '/itinerary'
+  to: '/' | '/api/chat'
+  id: '__root__' | '/' | '/api/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CaseStudyRoute: typeof CaseStudyRoute
-  CollectionRoute: typeof CollectionRoute
-  DiscoverRoute: typeof DiscoverRoute
-  ItineraryRoute: typeof ItineraryRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/itinerary': {
-      id: '/itinerary'
-      path: '/itinerary'
-      fullPath: '/itinerary'
-      preLoaderRoute: typeof ItineraryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/discover': {
-      id: '/discover'
-      path: '/discover'
-      fullPath: '/discover'
-      preLoaderRoute: typeof DiscoverRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/collection': {
-      id: '/collection'
-      path: '/collection'
-      fullPath: '/collection'
-      preLoaderRoute: typeof CollectionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/case-study': {
-      id: '/case-study'
-      path: '/case-study'
-      fullPath: '/case-study'
-      preLoaderRoute: typeof CaseStudyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -122,15 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CaseStudyRoute: CaseStudyRoute,
-  CollectionRoute: CollectionRoute,
-  DiscoverRoute: DiscoverRoute,
-  ItineraryRoute: ItineraryRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
