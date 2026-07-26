@@ -366,19 +366,9 @@ function Home() {
           </details>
           <div className="mt-12 pt-8 border-t border-border/40 flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
             <p>© Chengdu Lens · Demo project</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <a
-                href="https://github.com/aujingx/chengdulens"
-                target="_blank"
-                rel="noreferrer"
-                className="underline underline-offset-4 hover:text-foreground"
-              >
-                GitHub
-              </a>
-              <span>
-                {lang === "en" ? "Built with Lovable AI · Not affiliated with the city of Chengdu" : "由 Lovable AI 驱动 · 与成都市无关"}
-              </span>
-            </div>
+            <p>
+              {lang === "en" ? "Built with Lovable AI · Not affiliated with the city of Chengdu" : "由 Lovable AI 驱动 · 与成都市无关"}
+            </p>
           </div>
         </div>
       </footer>

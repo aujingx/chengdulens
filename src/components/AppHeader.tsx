@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Languages, Sparkles } from "lucide-react";
+import { Github, Languages, Sparkles } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { dict } from "@/data/i18n";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,17 @@ export function AppHeader() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="rounded-full border-coral/40 bg-coral/10 text-coral hover:bg-coral hover:text-coral-foreground"
+          >
+            <a href="https://github.com/aujingx/chengdulens" target="_blank" rel="noreferrer">
+              <Github className="h-4 w-4" />
+              <span className="hidden sm:inline">GitHub</span>
+            </a>
+          </Button>
           <Button
             variant="ghost"
             size="sm"
