@@ -12,7 +12,7 @@ The goal is not to show every travel feature, but to let reviewers see:
 
 - Clear user segmentation.
 - An AI-assisted product concept with scoped behavior.
-- Recommendations with evidence and data boundaries.
+- Recommendations that explain source signals, fit reasons, and next actions.
 - Disciplined MVP trade-offs.
 
 ## 2. Current Website Structure
@@ -66,9 +66,9 @@ Other international traveler scenarios are kept as research hypotheses and futur
 
 ### 5. Case Study
 
-- Explains the product case, AI Agent design, evidence boundaries, and roadmap.
-- Makes clear that the website is an interactive concept demo.
-- States that place descriptions, ticket information, route times, scores, and AI responses require verification before production use.
+- Explains the product case, AI Agent design, and roadmap.
+- Shows why Chengdu was selected, why the scope is narrow, and why discovery plus routing is the first loop.
+- Presents the source strategy, recommendation logic, and iteration plan.
 
 ## 5. Agent Logic
 
@@ -85,17 +85,14 @@ Hard constraints act as gates before scoring. Personal Fit and Evidence Confiden
 
 ## 6. Data Scope
 
-The first version uses 8 inline Chengdu place records. The data supports interface validation and portfolio storytelling only.
+The first version uses 8 inline Chengdu place records to support the full browsing, saving, routing, and Ask AI flow.
 
-All of the following require production-grade verification before real use:
+Data design principles:
 
-- Opening hours
-- Ticket rules
-- Booking links
-- Route times
-- Nearby recommendations
-- AI answers
-- Scoring and popularity signals
+- Factual fields should keep traceable source links.
+- Third-party platforms are used as outbound source links; the product does not copy reviews, usernames, avatars, or unauthorized ratings.
+- AI answers are scoped to place records, user preferences, and saved routes.
+- Route times, ticket notes, and opening rules are shown as lightweight guidance, not as a transaction flow.
 
 ## 7. Event Tracking
 

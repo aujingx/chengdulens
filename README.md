@@ -47,23 +47,7 @@ Key design decisions:
 - Keep hard constraints as gates before scoring.
 - Keep Personal Fit and Evidence Confidence conceptually separate.
 - Treat Chinese local platform signals, international traveler signals, and official facts as different evidence layers.
-- Show demo and data boundaries clearly.
-
-## Evidence Boundary
-
-This is an interactive concept demo.
-
-The following fields are for demonstration and require verification before production use:
-
-- place descriptions
-- opening hours
-- ticket rules and booking links
-- route times and transit notes
-- nearby recommendations
-- scores and popularity signals
-- AI responses
-
-The project does not copy third-party reviews, usernames, avatars, or unauthorized ratings.
+- Link to third-party platforms instead of copying reviews, usernames, avatars, or unauthorized ratings.
 
 ## Roadmap
 
@@ -72,7 +56,7 @@ The project does not copy third-party reviews, usernames, avatars, or unauthoriz
 - Polish the Chengdu-focused demo.
 - Keep the Case Study visible on the website.
 - Make the README and documentation explain product judgment clearly.
-- Avoid overclaiming real-time data, user validation, or production readiness.
+- Avoid unsupported claims about real-time data or completed user validation.
 
 ### Next
 

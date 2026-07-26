@@ -319,8 +319,8 @@ function Home() {
             title={lang === "en" ? "Case Study" : "产品案例"}
             subtitle={
               lang === "en"
-                ? "The live demo shows the experience. This section explains the product decisions, AI design, evidence boundaries, and roadmap behind it."
-                : "上面的 Demo 展示体验；这里说明背后的产品判断、AI 设计、证据边界和未来规划。"
+                ? "The live demo shows the experience. This section explains the product decisions, AI design, and roadmap behind it."
+                : "上面的 Demo 展示体验；这里说明背后的产品判断、AI 设计和未来规划。"
             }
           />
           <div className="mt-10 grid gap-5 md:grid-cols-2">
@@ -342,16 +342,6 @@ function Home() {
               </article>
             ))}
           </div>
-          <div className="mt-8 rounded-3xl border border-border/60 bg-background p-6">
-            <p className="font-display text-xl font-semibold">
-              {lang === "en" ? "Important scope note" : "重要边界说明"}
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              {lang === "en"
-                ? "This website is an interactive concept demo. Place descriptions, ticket information, route times, scores, and AI responses are for demonstration and require source registration, live-data pipelines, and user validation before production use."
-                : "本网站是交互式概念 Demo。地点描述、票务信息、路线时间、评分和 AI 回复均用于展示；真实上线前需要完成来源登记、实时数据管线和用户验证。"}
-            </p>
-          </div>
         </div>
       </section>
 
@@ -371,14 +361,24 @@ function Home() {
               <AboutRow h={lang === "en" ? "Problem" : "问题"} b={lang === "en" ? "For first-time visitors, Chengdu information is overloaded, not scarce. The cost is deciding what fits, what's trustworthy, and what's realistic today." : "对首次到成都的旅客，信息过载才是难点。真正的成本是：哪些合适、哪些可信、今天现实上做不做得到。"} />
               <AboutRow h={lang === "en" ? "MVP scope" : "MVP 范围"} b={lang === "en" ? "One loop, six sections, eight places, one AI concierge demo. No hotels, flights, ticket transactions, or social feed." : "一个循环、六个段落、八个地点、一个 AI 向导 Demo。不做酒店、机票、票务交易或社交流。"} />
               <AboutRow h={lang === "en" ? "AI architecture" : "AI 架构"} b={lang === "en" ? "Chat via Lovable AI Gateway. The 8 places are injected as a scoped knowledge base with ticket info, transit notes, nearby options, and risks." : "通过 Lovable AI Gateway 对话。8 个地点作为限定知识库注入 —— 票务信息、地铁提示、周边选择和风险。"} />
-              <AboutRow h={lang === "en" ? "Data boundary" : "数据边界"} b={lang === "en" ? "Everything is inline demo data. No third-party reviews or usernames are copied. Live hours / booking rules would need dedicated pipelines." : "全部为内联 Demo 数据。不复制第三方评论或用户名。真实开放时间和预约规则需要专属数据管线。"} />
+              <AboutRow h={lang === "en" ? "Source policy" : "来源策略"} b={lang === "en" ? "Source links are preferred for factual fields. Third-party reviews, usernames, avatars, and unauthorized ratings are not copied." : "事实字段优先保留来源链接。不复制第三方评论、用户名、头像或未经授权评分。"} />
             </div>
           </details>
           <div className="mt-12 pt-8 border-t border-border/40 flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
             <p>© Chengdu Lens · Demo project</p>
-            <p>
-              {lang === "en" ? "Built with Lovable AI · Not affiliated with the city of Chengdu" : "由 Lovable AI 驱动 · 与成都市无关"}
-            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <a
+                href="https://github.com/aujingx/chengdulens"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4 hover:text-foreground"
+              >
+                GitHub
+              </a>
+              <span>
+                {lang === "en" ? "Built with Lovable AI · Not affiliated with the city of Chengdu" : "由 Lovable AI 驱动 · 与成都市无关"}
+              </span>
+            </div>
           </div>
         </div>
       </footer>

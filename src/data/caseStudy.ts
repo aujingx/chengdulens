@@ -44,12 +44,12 @@ export const caseStudyDocs: CaseDoc[] = [
     points: {
       en: [
         "LLM responsibilities: intent understanding, tag normalization, explanation, and user-facing response.",
-        "Deterministic responsibilities: hard constraints, route feasibility, evidence boundaries, fallback states, and exclusion logic.",
+        "Deterministic responsibilities: hard constraints, route feasibility, source policy, fallback states, and exclusion logic.",
         "Hidden chain-of-thought is not shown; the reviewer-facing logic is structured as Understood, Retrieved, Checked, Excluded, Recommended, and Next Action.",
       ],
       zh: [
         "LLM 负责意图理解、标签归一、解释文案和用户对话。",
-        "确定性规则负责硬约束、路线可行性、证据边界、fallback 状态和排除逻辑。",
+        "确定性规则负责硬约束、路线可行性、来源策略、fallback 状态和排除逻辑。",
         "不展示隐藏思维链；面向评审展示的是 Understood、Retrieved、Checked、Excluded、Recommended、Next Action。",
       ],
     },
@@ -57,23 +57,23 @@ export const caseStudyDocs: CaseDoc[] = [
   {
     id: "evidence-scope",
     title: {
-      en: "Evidence & Scope",
-      zh: "证据与边界",
+      en: "Source & Trust Design",
+      zh: "来源与信任设计",
     },
     summary: {
-      en: "This is an interactive concept demo. Place content, ticket information, route timing, scores, and AI responses are for demonstration and require verification before production use.",
-      zh: "这是一个交互式概念 Demo。地点内容、票务信息、路线时间、评分和 AI 回复均用于展示，真实上线前需要重新验证。",
+      en: "The product separates source facts, local platform signals, international traveler intent, and AI explanations so recommendations do not rely on fluency alone.",
+      zh: "产品将来源事实、本地平台信号、国际游客意图和 AI 解释分开处理，避免推荐只依赖流畅文案。",
     },
     points: {
       en: [
-        "Verified secondary facts can support context and design constraints, but not product results.",
-        "Research hypotheses can define scenarios and test tasks, but should not be written as completed user interviews.",
-        "Third-party platform content should be linked, not copied. Reviews, usernames, avatars, and unauthorized ratings are excluded.",
+        "Official or source-linked information is used for factual fields such as tickets, opening rules, and access constraints.",
+        "Local platform links can support popularity and fit signals without copying user reviews, usernames, avatars, or unauthorized ratings.",
+        "The visible recommendation should explain why a place fits, what signal supports it, and what the user may need to check next.",
       ],
       zh: [
-        "已验证二手事实可支持背景和设计约束，但不能当作产品结果。",
-        "研究假设可用于定义场景和测试任务，但不能写成已完成的用户访谈。",
-        "第三方平台内容只能链接，不复制评论、用户名、头像或未经授权评分。",
+        "票务、开放规则、可达性等事实字段优先使用官方或可追溯链接。",
+        "本地平台链接可用于辅助热度和适配度判断，但不复制用户评论、用户名、头像或未经授权评分。",
+        "前台推荐需要解释为什么适合、由哪些信号支持，以及用户下一步需要确认什么。",
       ],
     },
   },

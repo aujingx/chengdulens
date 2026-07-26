@@ -58,7 +58,7 @@ Taste Profile -> 可信发现 -> 证据详情 -> 个人收藏 -> 半日路线 ->
 - Personal Fit 与 Evidence Confidence 双评分
 - 地点证据详情和来源链接
 - 个人 Collection
-- Case Study：展示产品判断、AI Agent 逻辑和证据边界
+- Case Study：展示产品判断、AI Agent 逻辑和来源策略
 - 半日路线与一次局部重规划
 
 ### MVP Excludes

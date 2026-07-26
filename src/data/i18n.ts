@@ -209,8 +209,8 @@ export const dict = {
       doesBody: "把地点匹配到你的偏好，Personal Fit 与 Evidence Confidence 始终分开，输出一条可走通的半日路线。",
       doesnt: "不做什么",
       doesntBody: "不做酒店、机票、门票、复制评论，不做隐藏排序。",
-      data: "数据边界",
-      dataBody: "8 个精选成都地点。每一条推荐理由都可追溯到字段级来源，或明确标注需要现场确认。",
+      data: "来源策略",
+      dataBody: "8 个精选成都地点。事实字段优先保留来源链接，第三方内容只作为外链入口。",
       howItWorks: "循环怎么跑",
       steps: [
         { t: "画像", d: "时间、出发点、饮食、步行、天气 —— 作为硬约束的 gate，而不是氛围。" },
