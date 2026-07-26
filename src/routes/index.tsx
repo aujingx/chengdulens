@@ -89,13 +89,11 @@ function Home() {
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[0.98] tracking-tight">
               {lang === "en" ? (
                 <>
-                  See Chengdu the way <br />
-                  you'd <span className="italic font-light text-coral">actually</span> live it.
+                  See Chengdu the way you'd <span className="italic font-light text-coral">actually</span> live it.
                 </>
               ) : (
                 <>
-                  以你真实的生活方式，<br />
-                  <span className="italic font-light text-coral">看见</span>成都。
+                  以你真实的生活方式，<span className="italic font-light text-coral">看见</span>成都。
                 </>
               )}
             </h1>
