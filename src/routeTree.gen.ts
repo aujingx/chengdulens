@@ -14,6 +14,7 @@ import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as CollectionRouteImport } from './routes/collection'
 import { Route as CaseStudyRouteImport } from './routes/case-study'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const ItineraryRoute = ItineraryRouteImport.update({
   id: '/itinerary',
@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/collection': typeof CollectionRoute
   '/discover': typeof DiscoverRoute
   '/itinerary': typeof ItineraryRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/collection': typeof CollectionRoute
   '/discover': typeof DiscoverRoute
   '/itinerary': typeof ItineraryRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,12 +70,25 @@ export interface FileRoutesById {
   '/collection': typeof CollectionRoute
   '/discover': typeof DiscoverRoute
   '/itinerary': typeof ItineraryRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/case-study' | '/collection' | '/discover' | '/itinerary'
+  fullPaths:
+    | '/'
+    | '/case-study'
+    | '/collection'
+    | '/discover'
+    | '/itinerary'
+    | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/case-study' | '/collection' | '/discover' | '/itinerary'
+  to:
+    | '/'
+    | '/case-study'
+    | '/collection'
+    | '/discover'
+    | '/itinerary'
+    | '/api/chat'
   id:
     | '__root__'
     | '/'
@@ -75,6 +96,7 @@ export interface FileRouteTypes {
     | '/collection'
     | '/discover'
     | '/itinerary'
+    | '/api/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -83,6 +105,7 @@ export interface RootRouteChildren {
   CollectionRoute: typeof CollectionRoute
   DiscoverRoute: typeof DiscoverRoute
   ItineraryRoute: typeof ItineraryRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -122,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -131,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   CollectionRoute: CollectionRoute,
   DiscoverRoute: DiscoverRoute,
   ItineraryRoute: ItineraryRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
