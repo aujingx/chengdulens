@@ -100,8 +100,8 @@ export function AskAI() {
           </p>
           <p className="text-xs text-muted-foreground">
             {lang === "en"
-              ? "Real AI · aware of your taste and saved places"
-              : "真实 AI · 了解你的偏好与收藏"}
+              ? "AI concierge demo · scoped to your taste, saves, and these 8 places"
+              : "AI 向导 Demo · 聚焦你的偏好、收藏和这 8 个地点"}
           </p>
         </div>
       </div>
@@ -111,8 +111,8 @@ export function AskAI() {
           <div className="text-center py-8">
             <p className="text-sm text-muted-foreground mb-4">
               {lang === "en"
-                ? "Ask anything about these 8 places, or start with one:"
-                : "关于这 8 个地点问什么都可以，或从下面这些开始："}
+                ? "Ask about these 8 places, routes, food, tickets, or rain backups:"
+                : "可以询问这 8 个地点、路线、饮食、票务或雨天备份："}
             </p>
             <div className="grid gap-2 max-w-md mx-auto">
               {suggestions.map((s) => (

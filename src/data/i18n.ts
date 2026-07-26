@@ -163,7 +163,7 @@ export const dict = {
         },
         {
           h: "MVP scope",
-          b: "One loop, six views, eight places. No hotels, flights, tickets, group tours, or a social feed. The demo is scenario-locked so trade-offs are legible.",
+          b: "One loop, six sections, eight places, and one AI concierge demo. No hotels, flights, ticket transactions, group tours, or a social feed. The demo is scenario-locked so trade-offs are legible.",
         },
         {
           h: "Agent architecture",
@@ -343,7 +343,7 @@ export const dict = {
       sections: [
         { h: "问题", b: "对首次来成都的国际旅客，信息过载才是难点。真正的决策成本是：哪些合适、哪些可信、今天现实上做不做得到。" },
         { h: "目标用户", b: "首次到成都的国际独立旅行者，2–4 天，主要使用英文，不熟悉中国 App 与现场规则。" },
-        { h: "MVP 范围", b: "一个循环、六个视图、八个地点。不做酒店、机票、门票、跟团或社交流。Demo 锁定单一场景以便呈现取舍。" },
+        { h: "MVP 范围", b: "一个循环、六个段落、八个地点和一个 AI 向导 Demo。不做酒店、机票、票务交易、跟团或社交流。Demo 锁定单一场景以便呈现取舍。" },
         { h: "Agent 架构", b: "理解 → 检索 → 核查 → 排除 → 推荐 → 下一步。硬约束作为打分前的 gate；Personal Fit 与 Evidence Confidence 永远分离。" },
         { h: "RAG 与证据模型", b: "每一条推荐理由映射到字段级来源，或明确标注需要现场确认。不复制第三方评论或用户名。" },
         { h: "指标", b: "激活（画像完成）、信任互动（打开证据）、收藏转化、路线转化、改线成功。事件本地写入。" },

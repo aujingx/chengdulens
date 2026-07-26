@@ -22,6 +22,7 @@ import { PlaceCard } from "@/components/PlaceCard";
 import { PlaceDetailSheet } from "@/components/PlaceDetailSheet";
 import { AskAI } from "@/components/AskAI";
 import { AnchorNav, type Section } from "@/components/AnchorNav";
+import { caseStudyDocs } from "@/data/caseStudy";
 import { places, findPlace, type Place } from "@/data/places";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Turn your taste into a walkable Chengdu afternoon: 8 curated places with tickets, transit, nearby food — plus a real AI concierge you can ask anything.",
+          "Turn your taste into a walkable Chengdu afternoon: 8 curated places with source-linked ticket info, transit notes, nearby food, and an AI concierge demo.",
       },
       { property: "og:title", content: "Chengdu Lens" },
       { property: "og:description", content: "AI travel companion for first-time visitors to Chengdu." },
@@ -47,6 +48,7 @@ const SECTIONS: Section[] = [
   { id: "discover", en: "Discover", zh: "发现" },
   { id: "trip", en: "Your Trip", zh: "行程" },
   { id: "ask-ai", en: "Ask AI", zh: "问 AI" },
+  { id: "case-study", en: "Case Study", zh: "案例" },
 ];
 
 const RAIN_SWAP: Record<string, string> = {
@@ -99,8 +101,8 @@ function Home() {
             </h1>
             <p className="text-base text-muted-foreground leading-relaxed lg:pl-8 lg:border-l lg:border-border pb-3">
               {lang === "en"
-                ? "An AI concierge that turns your taste into a walkable afternoon — 8 curated places with real tickets, metro directions, and nearby recommendations. Plus a chat you can actually ask anything."
-                : "把你的偏好翻译成一段可以走完的下午 —— 8 个精选地点，含真实票价、地铁指引、周边推荐。再配一个真的可以问问题的 AI 对话。"}
+                ? "An AI concierge demo that turns your taste into a walkable afternoon — 8 curated places with source-linked ticket info, metro notes, nearby recommendations, and an assistant focused on these places."
+                : "一个城市 AI 向导 Demo，把你的偏好翻译成一段可以走完的下午 —— 8 个精选地点，含来源链接的票务信息、地铁提示、周边推荐，以及聚焦这些地点的 AI 助手。"}
             </p>
           </div>
 
@@ -154,7 +156,7 @@ function Home() {
                   <IssueRow n="01" label={lang === "en" ? "Your taste" : "你的偏好"} note={lang === "en" ? "One-tap demo profile" : "一键 Demo 偏好"} />
                   <IssueRow n="02" label={lang === "en" ? "8 curated places" : "8 个精选地点"} note={lang === "en" ? "Tickets, metro, nearby" : "门票、地铁、周边"} />
                   <IssueRow n="03" label={lang === "en" ? "A walkable trip" : "可走通的行程"} note={lang === "en" ? "With rain plan B" : "含雨天备份"} />
-                  <IssueRow n="04" label={lang === "en" ? "Real AI concierge" : "真实 AI 向导"} note={lang === "en" ? "Ask anything" : "问什么都可以"} />
+                  <IssueRow n="04" label={lang === "en" ? "AI concierge demo" : "AI 向导 Demo"} note={lang === "en" ? "Ask about these places" : "围绕这 8 个地点提问"} />
                 </ul>
               </div>
               <p className="mt-6 text-[11px] text-muted-foreground leading-relaxed">
@@ -299,12 +301,56 @@ function Home() {
             title={lang === "en" ? "Ask the concierge" : "问一下向导"}
             subtitle={
               lang === "en"
-                ? "This is a real AI — it knows your taste, your saved places, and every detail of the 8 spots."
-                : "这是真实 AI —— 它了解你的偏好、你的收藏、以及这 8 个地点的每个细节。"
+                ? "Ask about these 8 places, your saved route, food options, tickets, transit, and rain backups."
+                : "围绕这 8 个地点、你的收藏路线、吃什么、票务、交通和雨天备份提问。"
             }
           />
           <div className="mt-10">
             <AskAI />
+          </div>
+        </div>
+      </section>
+
+      {/* CASE STUDY */}
+      <section id="case-study" className="border-t border-border/40 bg-cream/50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 lg:pl-32">
+          <SectionHeader
+            no="06"
+            title={lang === "en" ? "Case Study" : "产品案例"}
+            subtitle={
+              lang === "en"
+                ? "The live demo shows the experience. This section explains the product decisions, AI design, evidence boundaries, and roadmap behind it."
+                : "上面的 Demo 展示体验；这里说明背后的产品判断、AI 设计、证据边界和未来规划。"
+            }
+          />
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
+            {caseStudyDocs.map((doc) => (
+              <article key={doc.id} className="rounded-3xl border border-border/60 bg-background p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="h-2 w-2 rounded-full bg-coral" />
+                  <h3 className="font-display text-2xl font-semibold">{doc.title[lang]}</h3>
+                </div>
+                <p className="text-sm leading-relaxed text-muted-foreground">{doc.summary[lang]}</p>
+                <ul className="mt-5 space-y-3">
+                  {doc.points[lang].map((point) => (
+                    <li key={point} className="flex gap-3 text-sm leading-relaxed">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-leaf" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+          <div className="mt-8 rounded-3xl border border-border/60 bg-background p-6">
+            <p className="font-display text-xl font-semibold">
+              {lang === "en" ? "Important scope note" : "重要边界说明"}
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              {lang === "en"
+                ? "This website is an interactive concept demo. Place descriptions, ticket information, route times, scores, and AI responses are for demonstration and require source registration, live-data pipelines, and user validation before production use."
+                : "本网站是交互式概念 Demo。地点描述、票务信息、路线时间、评分和 AI 回复均用于展示；真实上线前需要完成来源登记、实时数据管线和用户验证。"}
+            </p>
           </div>
         </div>
       </section>
@@ -323,8 +369,8 @@ function Home() {
             </summary>
             <div className="mt-8 grid md:grid-cols-2 gap-x-10 gap-y-6 text-sm leading-relaxed text-foreground/80">
               <AboutRow h={lang === "en" ? "Problem" : "问题"} b={lang === "en" ? "For first-time visitors, Chengdu information is overloaded, not scarce. The cost is deciding what fits, what's trustworthy, and what's realistic today." : "对首次到成都的旅客，信息过载才是难点。真正的成本是：哪些合适、哪些可信、今天现实上做不做得到。"} />
-              <AboutRow h={lang === "en" ? "MVP scope" : "MVP 范围"} b={lang === "en" ? "One loop, five sections, eight places, one real AI. No hotels, flights, tickets, or social feed." : "一个循环、五个段落、八个地点、一个真实 AI。不做酒店、机票、门票、社交流。"} />
-              <AboutRow h={lang === "en" ? "AI architecture" : "AI 架构"} b={lang === "en" ? "Streaming chat via Lovable AI Gateway. All 8 places are injected as a knowledge base with tickets, transit, nearby, and risks." : "通过 Lovable AI Gateway 流式对话。所有 8 个地点作为知识库注入 —— 门票、地铁、周边、风险。"} />
+              <AboutRow h={lang === "en" ? "MVP scope" : "MVP 范围"} b={lang === "en" ? "One loop, six sections, eight places, one AI concierge demo. No hotels, flights, ticket transactions, or social feed." : "一个循环、六个段落、八个地点、一个 AI 向导 Demo。不做酒店、机票、票务交易或社交流。"} />
+              <AboutRow h={lang === "en" ? "AI architecture" : "AI 架构"} b={lang === "en" ? "Chat via Lovable AI Gateway. The 8 places are injected as a scoped knowledge base with ticket info, transit notes, nearby options, and risks." : "通过 Lovable AI Gateway 对话。8 个地点作为限定知识库注入 —— 票务信息、地铁提示、周边选择和风险。"} />
               <AboutRow h={lang === "en" ? "Data boundary" : "数据边界"} b={lang === "en" ? "Everything is inline demo data. No third-party reviews or usernames are copied. Live hours / booking rules would need dedicated pipelines." : "全部为内联 Demo 数据。不复制第三方评论或用户名。真实开放时间和预约规则需要专属数据管线。"} />
             </div>
           </details>

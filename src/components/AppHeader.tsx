@@ -9,6 +9,7 @@ const ANCHORS = [
   { id: "discover", en: "Discover", zh: "发现" },
   { id: "trip", en: "Trip", zh: "行程" },
   { id: "ask-ai", en: "Ask AI", zh: "问 AI" },
+  { id: "case-study", en: "Case Study", zh: "案例" },
 ];
 
 export function AppHeader() {

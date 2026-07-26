@@ -69,7 +69,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Chengdu Lens is an AI concierge that turns your taste into a walkable half-day in Chengdu — with real tickets, transit, nearby food, and a rain-ready plan B.",
+          "Chengdu Lens is an AI concierge demo that turns your taste into a walkable half-day in Chengdu — with source-linked ticket info, transit notes, nearby food, and a rain-ready plan B.",
       },
       { name: "author", content: "Chengdu Lens" },
       { property: "og:title", content: "Chengdu Lens" },

@@ -19,7 +19,7 @@
 ├─────────────────────────────────────────────┤
 │  ③ Your Trip — 收藏 + 半日路线时间轴          │
 ├─────────────────────────────────────────────┤
-│  ④ Ask AI — 真实对话助手（inline，不浮动）    │
+│  ④ Ask AI — AI 向导 Demo（inline，不浮动）   │
 ├─────────────────────────────────────────────┤
 │  Footer: About this demo（原 Case Study 精简）│
 └─────────────────────────────────────────────┘
@@ -30,14 +30,14 @@
 - Case Study 收进 footer 的可展开 "About this demo"。
 - 用户浏览逻辑清晰：**看画像 → 挑景点 → 拼行程 → 问 AI**。
 
-## 二、真实 AI Agent（Lovable AI Gateway）
+## 二、AI Agent Demo（Lovable AI Gateway）
 
 - 启用 `LOVABLE_API_KEY`（不启用 Lovable Cloud，纯前端 + server function）。
 - 新建 `src/routes/api/chat.ts` — TanStack server route，使用 `streamText` + `openai/gpt-5.5`。
 - System prompt 注入：当前 Taste Profile、已收藏景点、8 个景点的详细数据（作为知识库）。
 - Chat UI 用 AI Elements（`conversation`、`message`、`prompt-input`、`shimmer`），流式渲染 markdown。
 - 建议问题预设 chip：「推荐一个雨天备份」「哪个最适合拍照」「安排我的下午路线」。
-- **删除**右下浮动 AgentDock 和脚本化 baseAgentLog，避免"假 AI"错觉。
+- **删除**右下浮动 AgentDock 和脚本化 baseAgentLog，避免静态脚本伪装为推理过程。
 
 ## 三、景点内容丰富化
 
