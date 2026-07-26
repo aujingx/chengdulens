@@ -1,48 +1,62 @@
 import { Link } from "@tanstack/react-router";
-import { Languages } from "lucide-react";
+import { Languages, Sparkles } from "lucide-react";
 import { useApp } from "@/lib/store";
+import { dict } from "@/data/i18n";
 import { Button } from "@/components/ui/button";
+
+const ANCHORS = [
+  { id: "taste", en: "Taste", zh: "偏好" },
+  { id: "discover", en: "Discover", zh: "发现" },
+  { id: "trip", en: "Trip", zh: "行程" },
+  { id: "ask-ai", en: "Ask AI", zh: "问 AI" },
+];
 
 export function AppHeader() {
   const lang = useApp((s) => s.lang);
   const setLang = useApp((s) => s.setLang);
   const useDemoProfile = useApp((s) => s.useDemoProfile);
+  const t = dict[lang];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/40 bg-background/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2.5 shrink-0">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-foreground text-background font-display font-bold text-sm">
-            成
+        <Link to="/" className="flex items-center gap-2 shrink-0">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-coral text-coral-foreground">
+            <Sparkles className="h-4 w-4" />
           </span>
-          <div className="leading-tight">
-            <p className="font-display text-base font-semibold">Chengdu Lens</p>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              {lang === "en" ? "AI Travel Companion" : "AI 旅行向导"}
-            </p>
-          </div>
+          <span className="font-display text-lg font-semibold tracking-tight">{t.brand}</span>
         </Link>
+        <nav className="hidden md:flex items-center gap-1 ml-4">
+          {ANCHORS.map((a) => (
+            <a
+              key={a.id}
+              href={`#${a.id}`}
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById(a.id)?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="rounded-full px-3 py-1.5 text-sm font-medium text-foreground/65 hover:text-foreground hover:bg-muted transition-colors"
+            >
+              {lang === "en" ? a.en : a.zh}
+            </a>
+          ))}
+        </nav>
         <div className="ml-auto flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1.5 text-muted-foreground hover:text-foreground"
+            className="gap-1.5 text-foreground/70"
             onClick={() => setLang(lang === "en" ? "zh" : "en")}
           >
             <Languages className="h-4 w-4" />
-            <span className="text-xs font-semibold">{lang === "en" ? "中文" : "EN"}</span>
+            <span className="text-xs font-semibold">{lang === "en" ? "中" : "EN"}</span>
           </Button>
           <Button
             size="sm"
-            className="hidden sm:inline-flex bg-coral text-coral-foreground hover:bg-coral/90 rounded-full"
-            onClick={() => {
-              useDemoProfile();
-              document
-                .getElementById("discover")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
+            className="hidden sm:inline-flex rounded-full bg-coral text-coral-foreground hover:bg-coral/90"
+            onClick={() => useDemoProfile()}
           >
-            {lang === "en" ? "Try Demo Profile" : "使用 Demo 场景"}
+            {lang === "en" ? "Try demo" : "试用 Demo"}
           </Button>
         </div>
       </div>
