@@ -1,119 +1,85 @@
 
-# Chengdu Lens · 旅行 AI Demo
+# Chengdu Lens · 重构方案
 
-一个面向首次来成都的国际独立旅行者的 AI 城市发现助手 Demo。整体走**明亮、放松、快乐的旅行调性**，而不是原 prompt 里那种冷峻的产品仪表盘 —— UIUX 优先，动线顺滑，一眼看懂。
+针对你指出的 4 个问题，做一次系统性重做。
 
-## 视觉与体验基调
+## 一、导航重构：从 5 tab → 单页滚动 + 侧边锚点
 
-- **配色（明亮旅行感）**
-  - 底：奶油米白 `#FBF7F0`
-  - 主文字：深墨 `#1F2A24`
-  - 强调色 1（暖橘珊瑚，主 CTA / 高光）：`#FF7A4D`
-  - 强调色 2（清新草绿，标签 / 成功态）：`#4EA871`
-  - 强调色 3（晴空蓝，Agent / 信息态）：`#2F80ED`
-  - 柔和黄（点缀 / hover）：`#F4C95D`
-- **字体**：Outfit（标题，圆润现代）+ Figtree（正文，清晰友好），通过 Google Fonts 在 `__root.tsx` 用 `<link>` 加载。
-- **形态**：中等圆角（12–20px）、柔和阴影、卡片有呼吸感、留白舒展，不做仪表盘那种高密度堆叠。
-- **布局**：顶部导航 + 全宽主内容 + 右下浮动 Agent 助手按钮（点开为侧抽屉，可最小化）。
+**删除**：顶部多 tab 结构、Case Study 独立页、Collection 独立页。
 
-## 信息架构（顶部导航 5 项）
+**新结构**（单页 `/`，从上到下）：
 
-1. Home（封面故事 + 大 CTA）
-2. Discover（推荐卡片流）
-3. My Collection（收藏）
-4. Route（半日路线 + 雨天改线）
-5. Case Study（PM 作品集案例）
+```text
+┌─────────────────────────────────────────────┐
+│  Hero: 城市封面 + 一句话 + [开始探索] CTA      │
+├─────────────────────────────────────────────┤
+│  ① Your Taste — 一屏画像（默认已填 Demo）    │
+├─────────────────────────────────────────────┤
+│  ② Discover — 8 个景点卡片流                  │
+├─────────────────────────────────────────────┤
+│  ③ Your Trip — 收藏 + 半日路线时间轴          │
+├─────────────────────────────────────────────┤
+│  ④ Ask AI — 真实对话助手（inline，不浮动）    │
+├─────────────────────────────────────────────┤
+│  Footer: About this demo（原 Case Study 精简）│
+└─────────────────────────────────────────────┘
+```
 
-右上角：语言切换（EN / 中）、"Use Demo Profile" 快捷入口。
-右下角：浮动 Agent 助手气泡（在 Discover / Collection / Route 页可展开为侧抽屉）。
+- 左侧固定 **锚点导航条**（4 个圆点 + 标签，scroll-spy 高亮当前段落）。
+- 顶部只保留 Logo + 语言切换。删除移动端横向 tab。
+- Case Study 收进 footer 的可展开 "About this demo"。
+- 用户浏览逻辑清晰：**看画像 → 挑景点 → 拼行程 → 问 AI**。
 
-## 各页面设计
+## 二、真实 AI Agent（Lovable AI Gateway）
 
-### 1. Home（城市封面故事 + 大 CTA）
-- 全宽 hero：成都街景/公园图 + 覆盖式渐变，中央大标题 "See Chengdu the way you'd actually live it."，副标题一句话说明产品定位。
-- 主 CTA：**Start with a Demo Profile**（一键载入默认场景：4 小时、太古里出发、不吃辣、偏安静、可能下雨）。
-- 次 CTA：Build your own taste（进入 Taste Profile 表单）。
-- 下方三段"这个产品做什么 / 不做什么 / 数据边界"横向卡片。
-- 明确 Demo 标签："Demo scenario. Not based on completed user interviews."
+- 启用 `LOVABLE_API_KEY`（不启用 Lovable Cloud，纯前端 + server function）。
+- 新建 `src/routes/api/chat.ts` — TanStack server route，使用 `streamText` + `openai/gpt-5.5`。
+- System prompt 注入：当前 Taste Profile、已收藏景点、8 个景点的详细数据（作为知识库）。
+- Chat UI 用 AI Elements（`conversation`、`message`、`prompt-input`、`shimmer`），流式渲染 markdown。
+- 建议问题预设 chip：「推荐一个雨天备份」「哪个最适合拍照」「安排我的下午路线」。
+- **删除**右下浮动 AgentDock 和脚本化 baseAgentLog，避免"假 AI"错觉。
 
-### 2. Taste Profile（品味画像）
-- 单页表单，分 4 步用进度条串起（但都在一屏内、可任意跳）：
-  1. 场景（时间 / 出发点 / 结束时间）
-  2. 品味标签（5 张可点选卡：quiet neighborhoods / local texture / photogenic / culture+food / creative & contemporary）
-  3. 硬约束（预算、步行、饮食忌口、雨天备份）
-  4. 自然语言补充（大文本框）
-- 顶部醒目按钮："Use Demo Profile" 一键填好全部字段。
-- 完成后进入 Discover。
+## 三、景点内容丰富化
 
-### 3. Discover（发现）
-- 顶部：当前画像摘要 chip 条 + 简单筛选（indoor / photogenic / low spice）。
-- 主区：8 张 Chengdu 地点卡（数据全部内联 inline），每卡：
-  - 真实照片（Wikimedia 图片，失败降级为渐变占位 + "Image unavailable"）
-  - 名称（EN + 中文小字）+ 类型标签
-  - Why this fits（一句话）
-  - 两个圆环/条状指标：**Personal Fit** 与 **Evidence Confidence**（始终分开）
-  - 风险一句话 + Source 链接
-  - Save / Not for me 两个按钮
-- 交互反馈：Save 后卡片微动效 + 右下 Agent 气泡显示"Added to your collection"。
+`src/data/places.ts` 每条景点补充：
 
-### 4. Evidence Detail（详情弹层 / 抽屉）
-- 从 Discover 卡点开为大抽屉（不切页面，减少断层）。
-- 左：大图 + 图源标签；右：Personal Fit / Evidence Confidence 分开展示；下：International Relevance / Local Relevance / Operational Accessibility 三条评估、字段级来源、时间戳、需确认风险、Amap Demo 地图占位。
+- `intro`：2–3 段深度介绍（历史/文化背景），中英双语。
+- `nearby`：3–5 个周边好吃好玩，每个含名称、类型（food / cafe / shop / view）、一句话、步行分钟数。
+- `ticket`：`{ price, currency, hours, booking_url, note }`（免费则标注 free）。
+- `transit`：`{ metro: "Line 2 · Chunxi Road Exit D", walk_min, tips }`。
+- `bestTime`：建议时段（避开人群/最佳光线）。
 
-### 5. My Collection（收藏）
-- 顶部：已收藏数 / 类型分布小图 / 预计总时长。
-- 卡片网格 + 可拖拽排序（UX 亮点）。
-- 至少 3 个收藏时高亮"Build my half-day route" CTA。
+**Detail Sheet 抽屉重做**：从右侧全高抽屉滑出，分区展示：
+Hero 图 → 快速信息条（票价 / 时长 / 地铁） → 深度介绍 → 周边推荐（横向卡片） → 门票预约按钮 → 评估指标（Personal Fit / Evidence 折叠在最下）。
 
-### 6. Route & Rain Replan
-- 左：垂直时间轴（出发 → 各点 → 返回缓冲），每段显示步行/交通时间、停留、Agent 的一条 trade-off 说明。
-- 右：Demo 地图占位（SVG，成都轮廓 + 编号 pin，连线）。
-- 顶部大按钮 **"Rain just started"** → 触发改线：并排展示"保留 / 替换 / 原因 / 新风险"对比卡，替换项用户绿色标签，被替换项灰化划掉。
+## 四、视觉重做（等你选方向）
 
-### 7. Agent Workspace（右下浮动 → 侧抽屉）
-- 全站可召唤，不占主内容。
-- 抽屉里显示 6 段固定阶段：Understood / Retrieved / Checked / Excluded / Recommended / Next Action。
-- 每段用小图标 + 时间戳 + 简短句子（无隐藏思维链）。
-- 至少 3 次工具调用、1 个被排除候选（附原因）、1 个国际旅客可达性核查、1 个雨天改线总结。
+计划截取当前 Discover 页作为参考，生成 3 个 refined 视觉方向，锁定当前的暖橘/草绿/晴空蓝配色 + Outfit/Figtree 字体，让你挑一个再实施。三个方向的差异化：
 
-### 8. Case Study
-- 单页可滚动，编辑感排版：问题 / 目标用户 / MVP 范围 / Agent 架构 / RAG 与证据模型 / 指标 / 局限。
-- 每段配简单示意图（SVG）；不外链 md 文件，直接内联渲染。
+- **A · Editorial Travel**：大图杂志感、留白舒展、Serif 强调标题句、卡片信息极简（图 + 名 + 一句话 fit reason + Save）。
+- **B · Warm Concierge**：柔和圆角、暖阳阴影、每张卡片带一枚 emoji tag + 3 条 quick facts（🎫 免费 · 🚇 2min · 📸 photogenic）。
+- **C · Bento Grid**：不等大方格、封面景点占大格、其余小格，密度高但节奏清晰，快速扫读。
 
-## 技术方案
+## 五、卡片精简（现在文字太多）
 
-- 全在前端完成，**不启用 Lovable Cloud**。
-- TanStack Start 现有文件路由：
-  - `src/routes/index.tsx` → Home（**替换现有占位**）
-  - `src/routes/discover.tsx`
-  - `src/routes/collection.tsx`
-  - `src/routes/route.tsx`
-  - `src/routes/case-study.tsx`
-  - Taste Profile 作为 modal / drawer 覆盖在 Home 或独立 `src/routes/profile.tsx`
-- 每个路由自带 `head()`（唯一 title / description / og）。
-- 全局状态用轻量 zustand + `localStorage` 持久化：profile / saves / rejects / route / replan / language / eventLog。
-- 内联数据：`src/data/places.ts`（8 条 Chengdu 地点，字段照 prompt schema）+ `src/data/i18n.ts`（EN / 中 双语字典）+ `src/data/agent-script.ts`（Agent 阶段脚本）。
-- UI：shadcn 组件（Button / Card / Dialog / Sheet / Tabs / Progress / Badge / Tooltip）+ Tailwind v4 语义 token。
-- 设计 token 全部落到 `src/styles.css` 的 `@theme` + `:root`（oklch 格式），组件里绝不写 hex 或 `bg-white`。
-- 字体在 `__root.tsx` head 用 `<link>` 引 Google Fonts（Outfit + Figtree）。
-- Lucide 图标。
-- 图片：Wikimedia URL 直连 + `onError` 降级为渐变 + 文案占位。
-- 事件日志：写入 `localStorage.eventLog`，Case Study 页有一段"事件如何映射到指标"的说明。
-- 语言切换：`useLanguage()` hook + 字典对象；单语言模式下不混合另一语言（除专有名词）。
+**移除**：Evidence grade 徽章、双评分条、风险警告文案、Not for me 按钮、View detail 链接。
 
-## 验收（对齐 prompt §7）
+**保留 & 优化**：图片、名称（中英）、类型 + 区域、**一句话 why fits**、Save 按钮、3 个 quick fact 图标（票价/时长/室内外）。
 
-- 一键 Demo Profile → 保存 3 个地点 → 生成路线 → 触发一次雨天改线，全程 ≤ 2 分钟。
-- 展示至少 3 种地点类型；Personal Fit 与 Evidence Confidence 始终分离。
-- 硬约束作为 Gate 不进入加权分。
-- Agent 抽屉展示工具调用、排除原因、下一步。
-- 无 API key、刷新后状态保留、单语言模式无中英混杂、不复制第三方评论/用户名/头像/评分。
+评分和风险信息移入详情抽屉。
 
-## 构建顺序
+## 构建顺序（build 模式内执行）
 
-1. 设计 token + 字体 + 双语字典 + 内联地点数据 + zustand store。
-2. Home + Taste Profile。
-3. Discover + Evidence Detail 抽屉。
-4. Collection + Agent 浮动助手 & 侧抽屉。
-5. Route + Rain Replan + 事件日志。
-6. Case Study + 空态 / 图片降级 / 响应式 + 各路由 head。
+1. 截取当前 Discover 页 → `design--create_directions` 生 3 方向 → 你挑一个。
+2. 单页滚动结构 + 锚点导航（删除 `discover.tsx` / `collection.tsx` / `itinerary.tsx` / `case-study.tsx`，全部合入 `index.tsx` 分区组件）。
+3. 扩充 `places.ts` 数据（intro / nearby / ticket / transit / bestTime）。
+4. 重做 PlaceCard（精简）+ PlaceDetailSheet（内容丰富）。
+5. 接入 `LOVABLE_API_KEY` + `/api/chat` + AI Elements chat UI，替换旧 AgentDock。
+6. 事件收尾：删除废弃组件、更新 `__root.tsx` head、检查响应式。
+
+## 技术细节
+
+- 数据仍全部 inline，不启用 Lovable Cloud（只需 AI Gateway 的 `LOVABLE_API_KEY`）。
+- AI Elements 通过 `bun x ai-elements@latest add conversation message prompt-input shimmer` 安装。
+- 单页锚点用原生 `scrollIntoView({ behavior: 'smooth' })` + `IntersectionObserver` 做 scroll-spy。
+- 门票链接用官方站（如武侯祠 wuhouci.net.cn），无官方预约的标注"On-site tickets only"。
