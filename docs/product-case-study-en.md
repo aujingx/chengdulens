@@ -2,15 +2,20 @@
 
 ## 1. Executive Summary
 
-Chengdu Lens is an AI city-discovery agent for first-time international independent travelers visiting Chengdu. It does not solve the question "what attractions exist in Chengdu." It focuses on "which places fit me, why they are trustworthy, and whether I can realistically do them today."
+| | |
+|---|---|
+| **Target** | First-time international visitors in Chengdu with limited familiarity with Chinese travel apps. |
+| **Problem** | Plenty of content, but no quick way to judge personal fit, source quality, and what is practical today. |
+| **Product bet** | A recommendation is more likely to be saved when fit, evidence, and feasibility are visible. |
+| **My role** | Product strategy, user scenarios, Agent and RAG design, UX, and bilingual demo delivery. |
+| **Shipped** | Taste profile, 8 source-linked places, saves, half-day route, rain replan, and a scoped AI concierge. |
+| **Next gate** | 5 usability tests and an offline Agent evaluation set before expanding to another city. |
 
-The first product version focuses on one loop:
+First product loop:
 
 ```text
 Taste Profile -> Trusted Discovery -> Evidence Detail -> Personal Collection -> Half-Day Route -> Local Replan
 ```
-
-User scenarios in this document are research hypotheses. Place data is used to validate demo structure and does not represent live recommendations or business metrics.
 
 ## 2. Problem Definition
 

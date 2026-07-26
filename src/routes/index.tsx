@@ -22,7 +22,7 @@ import { PlaceCard } from "@/components/PlaceCard";
 import { PlaceDetailSheet } from "@/components/PlaceDetailSheet";
 import { AskAI } from "@/components/AskAI";
 import { AnchorNav, type Section } from "@/components/AnchorNav";
-import { caseStudyDocs } from "@/data/caseStudy";
+import { caseStudyBrief, caseStudyDecisions, caseStudyDocs } from "@/data/caseStudy";
 import { places, findPlace, type Place } from "@/data/places";
 import { cn } from "@/lib/utils";
 
@@ -316,13 +316,68 @@ function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 lg:pl-32">
           <SectionHeader
             no="06"
-            title={lang === "en" ? "Case Study" : "产品案例"}
+            title={lang === "en" ? "Product Review" : "产品评审"}
             subtitle={
               lang === "en"
-                ? "The live demo shows the experience. This section explains the product decisions, AI design, and roadmap behind it."
-                : "上面的 Demo 展示体验；这里说明背后的产品判断、AI 设计和未来规划。"
+                ? "First-time international visitors · Chengdu · Discovery before booking"
+                : "首次来访的国际游客 · 成都 · 先验证发现，再考虑交易"
             }
           />
+          <div className="mt-10 overflow-hidden rounded-3xl border border-border/60 bg-background">
+            <div className="grid md:grid-cols-[1.35fr_1fr] border-b border-border/60">
+              <div className="p-6 sm:p-8">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-coral">
+                  {lang === "en" ? "Product thesis" : "产品命题"}
+                </p>
+                <h3 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl font-semibold leading-tight">
+                  {lang === "en"
+                    ? "Turn fragmented travel content into a decision a visitor can trust and use today."
+                    : "把分散的旅行信息，转化为游客今天能够信任并执行的决策。"}
+                </h3>
+              </div>
+              <div className="border-t md:border-l md:border-t-0 border-border/60 bg-cream/45 p-6 sm:p-8">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+                  {lang === "en" ? "Key decisions" : "关键决策"}
+                </p>
+                <ul className="mt-4 grid grid-cols-2 gap-3 text-sm font-medium">
+                  {caseStudyDecisions[lang].map((decision) => (
+                    <li key={decision} className="flex gap-2">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                      <span>{decision}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <dl className="grid sm:grid-cols-2 lg:grid-cols-3">
+              {caseStudyBrief.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={cn(
+                    "border-t border-border/60 p-6",
+                    index % 2 === 1 && "sm:border-l",
+                    index % 3 === 0 ? "lg:border-l-0" : "lg:border-l",
+                  )}
+                >
+                  <dt className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                    {item.label[lang]}
+                  </dt>
+                  <dd className="mt-2 text-sm leading-relaxed">{item.value[lang]}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          <div className="mt-12 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-coral">
+                {lang === "en" ? "Decision details" : "决策详情"}
+              </p>
+              <h3 className="mt-2 font-display text-3xl font-semibold">
+                {lang === "en" ? "Strategy, system, and validation" : "策略、系统与验证"}
+              </h3>
+            </div>
+          </div>
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             {caseStudyDocs.map((doc) => (
               <article key={doc.id} className="rounded-3xl border border-border/60 bg-background p-6">
@@ -342,29 +397,27 @@ function Home() {
               </article>
             ))}
           </div>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button asChild className="rounded-full bg-coral text-coral-foreground hover:bg-coral/90">
+              <a href="#taste">{lang === "en" ? "Replay the product flow" : "重新体验产品流程"}</a>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full">
+              <a
+                href={`https://github.com/aujingx/chengdulens/blob/main/docs/product-case-study-${lang === "en" ? "en" : "cn"}.md`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {lang === "en" ? "Open full case study" : "查看完整案例"}
+              </a>
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* FOOTER */}
       <footer className="border-t border-border/40 bg-cream">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-14 lg:pl-32">
-          <details className="group">
-            <summary className="cursor-pointer list-none flex items-center justify-between">
-              <span className="font-display text-2xl font-semibold">
-                {lang === "en" ? "About this demo" : "关于这个 Demo"}
-              </span>
-              <span className="text-sm text-muted-foreground group-open:rotate-180 transition-transform">
-                ▾
-              </span>
-            </summary>
-            <div className="mt-8 grid md:grid-cols-2 gap-x-10 gap-y-6 text-sm leading-relaxed text-foreground/80">
-              <AboutRow h={lang === "en" ? "Problem" : "问题"} b={lang === "en" ? "For first-time visitors, Chengdu information is overloaded, not scarce. The cost is deciding what fits, what's trustworthy, and what's realistic today." : "对首次到成都的旅客，信息过载才是难点。真正的成本是：哪些合适、哪些可信、今天现实上做不做得到。"} />
-              <AboutRow h={lang === "en" ? "MVP scope" : "MVP 范围"} b={lang === "en" ? "One loop, six sections, eight places, one AI concierge demo. No hotels, flights, ticket transactions, or social feed." : "一个循环、六个段落、八个地点、一个 AI 向导 Demo。不做酒店、机票、票务交易或社交流。"} />
-              <AboutRow h={lang === "en" ? "AI architecture" : "AI 架构"} b={lang === "en" ? "Chat via Lovable AI Gateway. The 8 places are injected as a scoped knowledge base with ticket info, transit notes, nearby options, and risks." : "通过 Lovable AI Gateway 对话。8 个地点作为限定知识库注入 —— 票务信息、地铁提示、周边选择和风险。"} />
-              <AboutRow h={lang === "en" ? "Source policy" : "来源策略"} b={lang === "en" ? "Source links are preferred for factual fields. Third-party reviews, usernames, avatars, and unauthorized ratings are not copied." : "事实字段优先保留来源链接。不复制第三方评论、用户名、头像或未经授权评分。"} />
-            </div>
-          </details>
-          <div className="mt-12 pt-8 border-t border-border/40 flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 lg:pl-32">
+          <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
             <p>© Chengdu Lens · Demo project</p>
             <p>
               {lang === "en" ? "Built with Lovable AI · Not affiliated with the city of Chengdu" : "由 Lovable AI 驱动 · 与成都市无关"}
@@ -424,15 +477,6 @@ function PrincipleCard({ icon, title, body }: { icon: string; title: string; bod
         <p className="font-display font-semibold">{title}</p>
         <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{body}</p>
       </div>
-    </div>
-  );
-}
-
-function AboutRow({ h, b }: { h: string; b: string }) {
-  return (
-    <div>
-      <p className="font-display font-semibold text-foreground mb-1">{h}</p>
-      <p>{b}</p>
     </div>
   );
 }
