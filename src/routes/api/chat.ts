@@ -3,10 +3,17 @@ import { places } from "@/data/places";
 
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
-function buildSystemPrompt(profileText?: string, savedIds?: string[]) {
+function buildSystemPrompt(
+  profileText?: string,
+  savedIds?: string[],
+  routeIds?: string[],
+  rainActive?: boolean,
+) {
   const knowledge = places
     .map((p) => {
-      const nearby = p.nearby.map((n) => `${n.name} (${n.kind}, ${n.walkMin}min: ${n.note})`).join("; ");
+      const nearby = p.nearby
+        .map((n) => `${n.name} (${n.kind}, ${n.walkMin}min: ${n.note})`)
+        .join("; ");
       return `- ${p.name} / ${p.zhName} · ${p.category} · ${p.area}
   Fit: ${p.whyFits}
   Intro: ${p.intro}
@@ -26,6 +33,13 @@ function buildSystemPrompt(profileText?: string, savedIds?: string[]) {
         .join(", ")}.`
     : "The traveler has not saved anywhere yet.";
 
+  const route = routeIds?.length
+    ? `Current route: ${routeIds
+        .map((id) => places.find((p) => p.id === id)?.name)
+        .filter(Boolean)
+        .join(" -> ")}.`
+    : "No route has been generated yet.";
+
   return `You are Chengdu Lens, a warm, concise AI travel concierge for a first-time international visitor to Chengdu, China.
 
 STYLE
@@ -38,6 +52,8 @@ STYLE
 TRAVELER CONTEXT
 ${profileText ?? "No taste profile provided yet."}
 ${saved}
+${route}
+Rain-plan state: ${rainActive ? "active" : "inactive"}.
 
 KNOWLEDGE BASE (only these 8 places exist in this demo)
 ${knowledge}
@@ -48,6 +64,12 @@ TASKS YOU CAN DO
 - Propose a walkable order among saved places, with rough timings.
 - Answer practical questions: tickets, metro, opening hours, spice risk, photogenic timing.
 - Nearby food, cafe, or shop recommendations pulled from the knowledge base.
+
+RESPONSE CONTRACT
+- When the user gives preferences, constraints, or asks for a recommendation, make the product logic visible with these compact sections: **What I understood**, **Recommendation**, **Why it fits**, and **Check before you go**. Translate the section labels when replying in Chinese.
+- State observable reasons and evidence, not hidden chain-of-thought.
+- Distinguish personal fit from evidence confidence. Do not invent a match score.
+- If constraints conflict or required context is missing, ask one concise clarification instead of guessing.
 
 Keep answers under ~180 words unless the user asks for a full plan.`;
 }
@@ -65,6 +87,8 @@ export const Route = createFileRoute("/api/chat")({
           messages: ChatMessage[];
           profileText?: string;
           savedIds?: string[];
+          routeIds?: string[];
+          rainActive?: boolean;
         };
         try {
           payload = await request.json();
@@ -72,7 +96,7 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Invalid JSON", { status: 400 });
         }
 
-        const { messages, profileText, savedIds } = payload;
+        const { messages, profileText, savedIds, routeIds, rainActive } = payload;
         if (!Array.isArray(messages) || messages.length === 0) {
           return new Response("messages required", { status: 400 });
         }
@@ -82,7 +106,10 @@ export const Route = createFileRoute("/api/chat")({
           reasoning_effort: "none",
           stream: true,
           messages: [
-            { role: "system", content: buildSystemPrompt(profileText, savedIds) },
+            {
+              role: "system",
+              content: buildSystemPrompt(profileText, savedIds, routeIds, rainActive),
+            },
             ...messages.filter((m) => m.role === "user" || m.role === "assistant"),
           ],
         };
@@ -102,7 +129,9 @@ export const Route = createFileRoute("/api/chat")({
             return new Response("Rate limit — please try again in a moment.", { status: 429 });
           }
           if (upstream.status === 402) {
-            return new Response("AI credits exhausted. Add credits in your Lovable workspace.", { status: 402 });
+            return new Response("AI credits exhausted. Add credits in your Lovable workspace.", {
+              status: 402,
+            });
           }
           return new Response(text || "Upstream error", { status: upstream.status });
         }
@@ -130,7 +159,8 @@ export const Route = createFileRoute("/api/chat")({
                   try {
                     const parsed = JSON.parse(data);
                     const delta: string | undefined =
-                      parsed?.choices?.[0]?.delta?.content ?? parsed?.choices?.[0]?.message?.content;
+                      parsed?.choices?.[0]?.delta?.content ??
+                      parsed?.choices?.[0]?.message?.content;
                     if (delta) controller.enqueue(encoder.encode(delta));
                   } catch {
                     // ignore malformed chunk

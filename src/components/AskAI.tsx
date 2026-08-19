@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, Loader2 } from "lucide-react";
+import { Send, Sparkles, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useApp } from "@/lib/store";
@@ -9,12 +9,12 @@ import ReactMarkdown from "react-markdown";
 type Msg = { id: string; role: "user" | "assistant"; content: string };
 
 const SUGGESTIONS_EN = [
-  "Which place fits best if it rains?",
+  "First visit, four hours, rain, local culture, and no spicy food — what fits best?",
   "Order my saved places into a walkable afternoon.",
   "What's the most photogenic spot at sunset?",
 ];
 const SUGGESTIONS_ZH = [
-  "下雨的话哪一个最合适？",
+  "第一次来，只有四小时，下雨，想看本地文化且不吃辣，怎么安排？",
   "把我收藏的地点排成一个可走通的下午。",
   "傍晚哪里最适合拍照？",
 ];
@@ -23,6 +23,8 @@ export function AskAI() {
   const lang = useApp((s) => s.lang);
   const profile = useApp((s) => s.profile);
   const saves = useApp((s) => s.saves);
+  const routeIds = useApp((s) => s.routeIds);
+  const rainActive = useApp((s) => s.rainActive);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -58,6 +60,8 @@ export function AskAI() {
           messages: [...messages, userMsg].map((m) => ({ role: m.role, content: m.content })),
           profileText: profile?.request,
           savedIds: saves,
+          routeIds,
+          rainActive,
         }),
         signal: controller.signal,
       });
@@ -104,6 +108,43 @@ export function AskAI() {
               : "AI 向导 Demo · 聚焦你的偏好、收藏和这 8 个地点"}
           </p>
         </div>
+        <span className="ml-auto rounded-full border border-leaf/30 bg-leaf/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-leaf">
+          {lang === "en" ? "Live Lovable AI" : "Lovable AI 实时响应"}
+        </span>
+      </div>
+
+      <div className="border-b border-border/60 px-6 py-3">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="font-semibold text-foreground">
+            {lang === "en" ? "Current context" : "当前上下文"}
+          </span>
+          <ContextChip
+            label={
+              profile
+                ? `${profile.hours}h · ${profile.start}`
+                : lang === "en"
+                  ? "No taste profile"
+                  : "尚未设置偏好"
+            }
+          />
+          {profile && (
+            <ContextChip
+              label={
+                profile.diet === "no-spicy"
+                  ? lang === "en"
+                    ? "No spicy food"
+                    : "不吃辣"
+                  : profile.diet
+              }
+            />
+          )}
+          <ContextChip
+            label={lang === "en" ? `${saves.length} saved` : `已收藏 ${saves.length} 个`}
+          />
+          {rainActive && (
+            <ContextChip label={lang === "en" ? "Rain plan active" : "雨天方案已开启"} />
+          )}
+        </div>
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
@@ -129,7 +170,10 @@ export function AskAI() {
         )}
 
         {messages.map((m) => (
-          <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+          <div
+            key={m.id}
+            className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
+          >
             <div
               className={cn(
                 "max-w-[85%] rounded-2xl px-4 py-2.5",
@@ -157,8 +201,19 @@ export function AskAI() {
         ))}
 
         {error && (
-          <div className="rounded-xl bg-destructive/10 text-destructive text-sm px-4 py-3">{error}</div>
+          <div className="rounded-xl bg-destructive/10 text-destructive text-sm px-4 py-3">
+            {error}
+          </div>
         )}
+      </div>
+
+      <div className="border-t border-border/60 bg-cream/40 px-6 py-2.5 text-[11px] leading-relaxed text-muted-foreground flex gap-2">
+        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-leaf" />
+        <span>
+          {lang === "en"
+            ? "Bounded to 8 curated place records. Hours, booking, and on-site details must be confirmed with the linked source."
+            : "回答范围限定为 8 条精选地点记录；开放时间、预约及现场信息仍需通过来源链接确认。"}
+        </span>
       </div>
 
       <form
@@ -177,7 +232,9 @@ export function AskAI() {
               send(input);
             }
           }}
-          placeholder={lang === "en" ? "Ask about a place, a route, food…" : "问问某个地点、路线、吃的……"}
+          placeholder={
+            lang === "en" ? "Ask about a place, a route, food…" : "问问某个地点、路线、吃的……"
+          }
           rows={1}
           className="min-h-[44px] max-h-32 resize-none border-border/60"
           disabled={streaming}
@@ -193,4 +250,8 @@ export function AskAI() {
       </form>
     </div>
   );
+}
+
+function ContextChip({ label }: { label: string }) {
+  return <span className="rounded-full bg-muted px-2.5 py-1 text-muted-foreground">{label}</span>;
 }

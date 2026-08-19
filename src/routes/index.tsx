@@ -61,7 +61,7 @@ const RAIN_SWAP: Record<string, string> = {
 function Home() {
   const lang = useApp((s) => s.lang);
   const profile = useApp((s) => s.profile);
-  const useDemoProfile = useApp((s) => s.useDemoProfile);
+  const applyDemoProfile = useApp((s) => s.useDemoProfile);
   const saves = useApp((s) => s.saves);
   const rainActive = useApp((s) => s.rainActive);
   const setRain = useApp((s) => s.setRain);
@@ -111,7 +111,7 @@ function Home() {
               size="lg"
               className="rounded-full bg-coral text-coral-foreground hover:bg-coral/90 shadow-lg shadow-coral/20"
               onClick={() => {
-                useDemoProfile();
+                applyDemoProfile();
                 document.getElementById("discover")?.scrollIntoView({ behavior: "smooth" });
               }}
             >
@@ -126,6 +126,15 @@ function Home() {
               onClick={() => setProfileOpen(true)}
             >
               {lang === "en" ? "Build your own" : "自己填偏好"}
+            </Button>
+            <Button
+              size="lg"
+              variant="ghost"
+              className="rounded-full text-coral hover:text-coral"
+              onClick={() => document.getElementById("ask-ai")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              {lang === "en" ? "Ask live AI" : "直接问实时 AI"}
+              <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
 
@@ -212,7 +221,7 @@ function Home() {
                       : "载入 Demo 偏好，下面的内容会立即适配。"}
                   </p>
                   <div className="flex flex-col gap-2">
-                    <Button className="bg-coral text-coral-foreground hover:bg-coral/90" onClick={useDemoProfile}>
+                    <Button className="bg-coral text-coral-foreground hover:bg-coral/90" onClick={applyDemoProfile}>
                       {lang === "en" ? "Use demo taste" : "使用 Demo 偏好"}
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => setProfileOpen(true)}>
