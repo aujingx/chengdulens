@@ -80,6 +80,7 @@ Key design decisions:
 - [AI Agent System Design](docs/agent-system-design-en.md) / [中文](docs/agent-system-design-cn.md)
 - [Research & Evidence Appendix](docs/research-evidence-appendix-en.md) / [中文](docs/research-evidence-appendix-cn.md)
 - [Demo Specification](docs/demo-spec-en.md) / [中文](docs/demo-spec-cn.md)
+- [Agent Evaluation Cases](docs/agent-evaluation-cases-en.md) / [中文](docs/agent-evaluation-cases-cn.md)
 
 ## Development
 
