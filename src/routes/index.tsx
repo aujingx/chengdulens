@@ -12,6 +12,7 @@ import {
   Trash2,
   Compass,
   Ticket,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/lib/store";
@@ -25,6 +26,7 @@ import { AnchorNav, type Section } from "@/components/AnchorNav";
 import { caseStudyBrief, caseStudyDecisions, caseStudyDocs } from "@/data/caseStudy";
 import { places, findPlace, type Place } from "@/data/places";
 import { cn } from "@/lib/utils";
+import { computeRoute, proposeRainSwaps, applySwaps, type RainProposal } from "@/lib/tripMath";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -51,12 +53,6 @@ const SECTIONS: Section[] = [
   { id: "case-study", en: "Case Study", zh: "案例" },
 ];
 
-const RAIN_SWAP: Record<string, string> = {
-  "peoples-park": "chengdu-museum",
-  "wenshu-monastery": "chengdu-museum",
-  "du-fu-thatched-cottage": "chengdu-museum",
-  "jinli-alley": "chengdu-museum",
-};
 
 function Home() {
   const lang = useApp((s) => s.lang);
@@ -501,21 +497,19 @@ function TripSection({
 }) {
   const lang = useApp((s) => s.lang);
   const removeSave = useApp((s) => s.removeSave);
+  const confirmedIds = useApp((s) => s.confirmedIds);
+  const toggleConfirm = useApp((s) => s.toggleConfirm);
+  const rainSwaps = useApp((s) => s.rainSwaps);
+  const applyRainSwaps = useApp((s) => s.applyRainSwaps);
+  const planStatus = useApp((s) => s.planStatus);
+  const setPlanStatus = useApp((s) => s.setPlanStatus);
+  const [proposal, setProposal] = useState<RainProposal | null>(null);
 
-  const stops = useMemo(() => {
-    if (!rainActive) return savedPlaces;
-    let swapped = false;
-    return savedPlaces.map((p) => {
-      if (!swapped && !p.indoor && RAIN_SWAP[p.id]) {
-        const swap = findPlace(RAIN_SWAP[p.id]);
-        if (swap) {
-          swapped = true;
-          return swap;
-        }
-      }
-      return p;
-    });
-  }, [savedPlaces, rainActive]);
+  const stops = useMemo(
+    () => (rainActive ? applySwaps(savedPlaces, rainSwaps, findPlace) : savedPlaces),
+    [savedPlaces, rainActive, rainSwaps],
+  );
+  const route = useMemo(() => computeRoute(stops), [stops]);
 
   if (savedPlaces.length === 0) {
     return (
@@ -559,48 +553,110 @@ function TripSection({
     );
   }
 
-  const totalMin = stops.reduce((s, p) => s + p.duration + p.distanceFromStartMin, 0);
+  const en = lang === "en";
+  const nameOf = (id: string) => {
+    const p = findPlace(id);
+    return p ? (en ? p.name : p.zhName) : id;
+  };
 
   return (
     <div className="rounded-3xl bg-background border border-border/60 overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 p-5">
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
           <span className="inline-flex items-center gap-1.5 font-semibold">
-            <Clock className="h-4 w-4 text-coral" />
-            {Math.round(totalMin / 60 * 10) / 10}h {lang === "en" ? "total" : "总时长"}
+            <Clock className="h-4 w-4 text-coral" />≈{Math.round((route.totalMin / 60) * 10) / 10}h{" "}
+            {en ? "estimated" : "预估"}
           </span>
-          <span className="text-muted-foreground">·</span>
-          <span className="inline-flex items-center gap-1.5">
-            <Footprints className="h-4 w-4 text-leaf" />
-            {stops.length} {lang === "en" ? "stops" : "站"}
+          <span className="text-xs text-muted-foreground">
+            {en
+              ? `${route.stayMin} min at stops + ${route.travelMin} min moving + ${route.bufferMin} min buffer`
+              : `停留 ${route.stayMin} 分钟 + 移动 ${route.travelMin} 分钟 + 缓冲 ${route.bufferMin} 分钟`}
           </span>
         </div>
-        <Button
-          size="sm"
-          variant={rainActive ? "default" : "outline"}
-          className={cn(
-            "rounded-full",
-            rainActive && "bg-sky text-sky-foreground hover:bg-sky/90",
-          )}
-          onClick={onToggleRain}
-        >
+        <div className="flex gap-2">
           {rainActive ? (
-            <>
+            <Button size="sm" variant="outline" className="rounded-full" onClick={onToggleRain}>
               <RotateCcw className="h-4 w-4 mr-1.5" />
-              {lang === "en" ? "Back to original" : "回到原方案"}
-            </>
+              {en ? "Back to original" : "回到原方案"}
+            </Button>
           ) : (
-            <>
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setProposal(proposeRainSwaps(savedPlaces, places, confirmedIds))}
+            >
               <CloudRain className="h-4 w-4 mr-1.5" />
-              {lang === "en" ? "Rain just started" : "开始下雨了"}
-            </>
+              {en ? "Rain just started" : "开始下雨了"}
+            </Button>
           )}
-        </Button>
+          <Button
+            size="sm"
+            className={cn("rounded-full", planStatus === "confirmed" ? "bg-leaf text-leaf-foreground hover:bg-leaf/90" : "bg-coral text-coral-foreground hover:bg-coral/90")}
+            onClick={() => setPlanStatus(planStatus === "confirmed" ? "draft" : "confirmed")}
+          >
+            <Check className="h-4 w-4 mr-1.5" />
+            {planStatus === "confirmed" ? (en ? "Plan confirmed" : "行程已确认") : en ? "Confirm this plan" : "确认这个行程"}
+          </Button>
+        </div>
       </div>
+
+      {proposal && (
+        <div className="m-5 rounded-2xl border border-sky/40 bg-sky/10 p-5 text-sm">
+          <p className="font-display font-semibold mb-2">
+            {en ? "Rain plan — suggested changes" : "雨天方案 —— 建议调整"}
+          </p>
+          {proposal.swaps.length === 0 ? (
+            <p className="text-muted-foreground">
+              {en ? "No unused indoor place left to swap in. Keep the plan and bring an umbrella." : "没有可替换的室内地点，建议保持原计划并带伞。"}
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {proposal.swaps.map((sw) => (
+                <li key={sw.originalId}>
+                  {nameOf(sw.originalId)} → <strong>{nameOf(sw.replacementId)}</strong>{" "}
+                  <span className="text-muted-foreground">({en ? "indoor" : "室内"})</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {proposal.keptOutdoor.length > 0 && (
+            <p className="mt-2 text-muted-foreground">
+              {en ? "Stays outdoors (no unused indoor option): " : "保留户外（无可用室内替代）："}
+              {proposal.keptOutdoor.map(nameOf).join(", ")}
+            </p>
+          )}
+          {proposal.protectedIds.length > 0 && (
+            <p className="mt-1 text-muted-foreground">
+              {en ? "Not touched because you confirmed them: " : "已确认，不会改动："}
+              {proposal.protectedIds.map(nameOf).join(", ")}
+            </p>
+          )}
+          <div className="mt-4 flex gap-2">
+            <Button
+              size="sm"
+              className="rounded-full bg-sky text-sky-foreground hover:bg-sky/90"
+              disabled={proposal.swaps.length === 0}
+              onClick={() => {
+                applyRainSwaps(proposal.swaps);
+                setProposal(null);
+              }}
+            >
+              {en ? "Apply these changes" : "应用这些调整"}
+            </Button>
+            <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setProposal(null)}>
+              {en ? "Keep my plan" : "保持原计划"}
+            </Button>
+          </div>
+        </div>
+      )}
+
       <ol className="p-6 space-y-4">
         {stops.map((p, i) => {
           const original = savedPlaces[i];
           const swapped = rainActive && original && original.id !== p.id;
+          const leg = route.legs[i];
+          const confirmed = confirmedIds.includes(p.id);
           return (
             <li key={`${p.id}-${i}`} className="flex gap-4">
               <div className="flex flex-col items-center">
@@ -610,13 +666,19 @@ function TripSection({
                 {i < stops.length - 1 && <span className="w-px flex-1 bg-border my-2" />}
               </div>
               <div className="flex-1 pb-4">
+                {leg && (
+                  <p className="text-[11px] text-muted-foreground mb-1">
+                    ~{leg.minutes} min {leg.mode === "walk" ? (en ? "walk" : "步行") : en ? "metro/taxi" : "地铁/打车"}{" "}
+                    {en ? "from" : "自"} {i === 0 ? "Taikoo Li" : stops[i - 1].name} · {en ? "estimate" : "估算"}
+                  </p>
+                )}
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-display text-lg font-semibold">
                       {p.name}
                       <span className="ml-2 text-sm font-normal text-muted-foreground">{p.zhName}</span>
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-3">
+                    <p className="text-xs text-muted-foreground mt-0.5 flex flex-wrap items-center gap-3">
                       <span className="inline-flex items-center gap-1">
                         <Clock className="h-3 w-3" /> {p.duration} min
                       </span>
@@ -624,24 +686,33 @@ function TripSection({
                         <MapPin className="h-3 w-3" /> {p.area}
                       </span>
                       <span className="inline-flex items-center gap-1">
-                        <Ticket className="h-3 w-3" /> {lang === "en" ? p.ticket.price : p.ticket.priceZh}
+                        <Ticket className="h-3 w-3" /> {en ? p.ticket.price : p.ticket.priceZh}
                       </span>
                     </p>
                   </div>
-                  {swapped && (
-                    <span className="text-[10px] uppercase tracking-widest bg-sky/15 text-sky px-2 py-0.5 rounded-full font-semibold">
-                      {lang === "en" ? "Rain swap" : "雨天替换"}
-                    </span>
-                  )}
+                  <div className="flex flex-col items-end gap-1">
+                    {swapped && (
+                      <span className="text-[10px] uppercase tracking-widest bg-sky/15 text-sky px-2 py-0.5 rounded-full font-semibold">
+                        {en ? "Rain swap" : "雨天替换"}
+                      </span>
+                    )}
+                    {!swapped && (
+                      <button
+                        onClick={() => toggleConfirm(p.id)}
+                        className={cn(
+                          "text-[11px] rounded-full px-2.5 py-0.5 border",
+                          confirmed ? "bg-leaf/15 border-leaf/40 text-leaf font-semibold" : "border-border text-muted-foreground hover:border-leaf",
+                        )}
+                      >
+                        {confirmed ? (en ? "✓ Must keep" : "✓ 必去") : en ? "Mark must-keep" : "标为必去"}
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <p className="mt-2 text-sm text-coral font-medium leading-snug">
-                  {lang === "en" ? p.whyFits : p.whyFitsZh}
-                </p>
+                <p className="mt-2 text-sm text-coral font-medium leading-snug">{en ? p.whyFits : p.whyFitsZh}</p>
                 {swapped && original && (
                   <p className="mt-2 text-xs text-muted-foreground italic">
-                    {lang === "en"
-                      ? `Swapped in for ${original.name} — indoor, keeps the arc.`
-                      : `替换了 ${original.zhName} —— 室内，保持整体节奏。`}
+                    {en ? `Replaces ${original.name} after you approved the rain plan.` : `你确认雨天方案后替换了 ${original.zhName}。`}
                   </p>
                 )}
               </div>
@@ -649,6 +720,11 @@ function TripSection({
           );
         })}
       </ol>
+      <p className="border-t border-border/60 px-6 py-3 text-[11px] text-muted-foreground">
+        {en
+          ? "Times are estimates from approximate distances — no live route data. Saved ≠ confirmed: mark must-keep stops so the rain plan won't touch them."
+          : "时间为按大致距离估算，无实时路线数据。收藏≠确认：标为必去的地点不会被雨天方案改动。"}
+      </p>
     </div>
   );
 }

@@ -33,6 +33,10 @@ export type EventName =
   | "source_opened"
   | "place_saved"
   | "place_rejected"
+  | "place_unsaved"
+  | "place_confirmed"
+  | "plan_confirmed"
+  | "booking_opened"
   | "agent_tool_started"
   | "agent_tool_completed"
   | "agent_candidate_excluded"
@@ -50,6 +54,9 @@ type State = {
   rejects: string[];
   routeIds: string[];
   rainActive: boolean;
+  rainSwaps: { originalId: string; replacementId: string }[];
+  confirmedIds: string[];
+  planStatus: "draft" | "confirmed";
   events: LogEntry[];
   agentOpen: boolean;
   setLang: (l: Lang) => void;
@@ -60,6 +67,9 @@ type State = {
   removeSave: (id: string) => void;
   setRoute: (ids: string[]) => void;
   setRain: (v: boolean) => void;
+  applyRainSwaps: (swaps: { originalId: string; replacementId: string }[]) => void;
+  toggleConfirm: (id: string) => void;
+  setPlanStatus: (s: "draft" | "confirmed") => void;
   setAgentOpen: (v: boolean) => void;
   log: (name: EventName, meta?: Record<string, unknown>) => void;
   reset: () => void;
@@ -74,6 +84,9 @@ export const useApp = create<State>()(
       rejects: [],
       routeIds: [],
       rainActive: false,
+      rainSwaps: [],
+      confirmedIds: [],
+      planStatus: "draft",
       events: [],
       agentOpen: false,
       setLang: (lang) => set({ lang }),
@@ -91,7 +104,8 @@ export const useApp = create<State>()(
           saves: has ? get().saves.filter((x) => x !== id) : [...get().saves, id],
           rejects: get().rejects.filter((x) => x !== id),
         });
-        get().log(has ? "place_rejected" : "place_saved", { id });
+        if (has) set({ confirmedIds: get().confirmedIds.filter((x) => x !== id) });
+        get().log(has ? "place_unsaved" : "place_saved", { id });
       },
       reject: (id) => {
         set({
@@ -100,14 +114,33 @@ export const useApp = create<State>()(
         });
         get().log("place_rejected", { id });
       },
-      removeSave: (id) =>
-        set({ saves: get().saves.filter((x) => x !== id) }),
+      removeSave: (id) => {
+        set({
+          saves: get().saves.filter((x) => x !== id),
+          confirmedIds: get().confirmedIds.filter((x) => x !== id),
+          planStatus: "draft",
+        });
+        get().log("place_unsaved", { id });
+      },
+      toggleConfirm: (id) => {
+        const has = get().confirmedIds.includes(id);
+        set({ confirmedIds: has ? get().confirmedIds.filter((x) => x !== id) : [...get().confirmedIds, id] });
+        if (!has) get().log("place_confirmed", { id });
+      },
+      setPlanStatus: (planStatus) => {
+        set({ planStatus });
+        if (planStatus === "confirmed") get().log("plan_confirmed");
+      },
+      applyRainSwaps: (rainSwaps) => {
+        set({ rainSwaps, rainActive: true });
+        get().log("place_replaced", { swaps: rainSwaps });
+      },
       setRoute: (routeIds) => {
         set({ routeIds, rainActive: false });
         get().log("route_generated", { ids: routeIds });
       },
       setRain: (rainActive) => {
-        set({ rainActive });
+        set(rainActive ? { rainActive } : { rainActive, rainSwaps: [] });
         if (rainActive) get().log("replan_triggered");
       },
       setAgentOpen: (agentOpen) => set({ agentOpen }),
@@ -120,6 +153,9 @@ export const useApp = create<State>()(
           rejects: [],
           routeIds: [],
           rainActive: false,
+          rainSwaps: [],
+          confirmedIds: [],
+          planStatus: "draft",
           events: [],
         }),
     }),
