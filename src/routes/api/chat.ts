@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { places } from "@/data/places";
+import { regionKnowledgeText } from "@/data/region";
 
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
@@ -8,6 +9,7 @@ function buildSystemPrompt(
   savedIds?: string[],
   routeIds?: string[],
   rainActive?: boolean,
+  profile?: Record<string, unknown>,
 ) {
   const knowledge = places
     .map((p) => {
@@ -47,16 +49,26 @@ STYLE
 - Warm, honest, specific. Never generic.
 - Prefer short paragraphs and small markdown lists. Bold key names.
 - If a claim needs on-site confirmation (hours, booking, English signage), say so.
-- Never invent places outside the knowledge base below. If asked about something not in it, say you only cover these 8 curated places for this demo, and offer the closest match.
+- Never invent places outside the knowledge base below. If asked about something not in it, say you only cover these 8 curated Chengdu places plus the regional preset library for this demo, and offer the closest match.
 
 TRAVELER CONTEXT
 ${profileText ?? "No taste profile provided yet."}
+Structured profile: ${profile ? JSON.stringify(profile) : "none"}
 ${saved}
 ${route}
 Rain-plan state: ${rainActive ? "active" : "inactive"}.
 
-KNOWLEDGE BASE (only these 8 places exist in this demo)
+KNOWLEDGE BASE (8 Chengdu places)
 ${knowledge}
+
+REGIONAL PRESET LIBRARY (Scenario B: Chengdu today -> Jiuzhaigou / Huanglong / Songpan next day)
+${regionKnowledgeText()}
+- For multi-day plans, compare 2 draft options briefly (pace, altitude, transfers) and recommend one.
+- Always keep the four transfer modes distinct. Never invent prices, train times or quotas.
+- Warn about altitude for Huanglong; avoid it on arrival day.
+
+BOOKING
+- If the user confirms a plan or asks to book (e.g. "Help me book", "帮我预订"), briefly list what can be booked (hotel, train, scenic ticket, restaurant) and end your reply with the exact token [[BOOKING]] on its own line. The app then shows booking cards. Never claim a booking is confirmed yourself.
 
 TASKS YOU CAN DO
 - Recommend which places fit the traveler's taste, and why.
@@ -89,6 +101,7 @@ export const Route = createFileRoute("/api/chat")({
           savedIds?: string[];
           routeIds?: string[];
           rainActive?: boolean;
+          profile?: Record<string, unknown>;
         };
         try {
           payload = await request.json();
@@ -96,7 +109,7 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Invalid JSON", { status: 400 });
         }
 
-        const { messages, profileText, savedIds, routeIds, rainActive } = payload;
+        const { messages, profileText, savedIds, routeIds, rainActive, profile } = payload;
         if (!Array.isArray(messages) || messages.length === 0) {
           return new Response("messages required", { status: 400 });
         }
@@ -108,7 +121,7 @@ export const Route = createFileRoute("/api/chat")({
           messages: [
             {
               role: "system",
-              content: buildSystemPrompt(profileText, savedIds, routeIds, rainActive),
+              content: buildSystemPrompt(profileText, savedIds, routeIds, rainActive, profile),
             },
             ...messages.filter((m) => m.role === "user" || m.role === "assistant"),
           ],

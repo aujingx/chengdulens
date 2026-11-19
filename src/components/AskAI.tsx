@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useApp } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import { BookingPanel } from "@/components/BookingPanel";
 
 type Msg = { id: string; role: "user" | "assistant"; content: string };
 
@@ -13,6 +14,16 @@ const SUGGESTIONS_EN = [
   "Order my saved places into a walkable afternoon.",
   "What's the most photogenic spot at sunset?",
 ];
+const SCRIPTS = {
+  en: [
+    { label: "Demo A · 4h near Taikoo Li", text: "I have four hours this afternoon near Taikoo Li. I like quiet local streets, no spicy food, and I'd rather walk. Plan it for me." },
+    { label: "Demo B · Chengdu → Jiuzhaigou", text: "I land in Chengdu at 10am. Today I want culture and mild food; tomorrow I want Jiuzhaigou, Huanglong or Songpan. Compare two options and explain the station-to-hotel transfer choices." },
+  ],
+  zh: [
+    { label: "演示 A · 太古里 4 小时", text: "我今天下午在太古里附近有四个小时，喜欢安静的本地街区，不吃辣，想步行。帮我安排。" },
+    { label: "演示 B · 成都 → 九寨沟", text: "我上午 10 点到成都，今天想看文化、吃不辣的美食；明天想去九寨沟、黄龙或松潘。比较两个方案，并说明高铁站到酒店的接驳选择。" },
+  ],
+};
 const SUGGESTIONS_ZH = [
   "第一次来，只有四小时，下雨，想看本地文化且不吃辣，怎么安排？",
   "把我收藏的地点排成一个可走通的下午。",
@@ -59,6 +70,7 @@ export function AskAI() {
         body: JSON.stringify({
           messages: [...messages, userMsg].map((m) => ({ role: m.role, content: m.content })),
           profileText: profile?.request,
+          profile,
           savedIds: saves,
           routeIds,
           rainActive,
@@ -93,7 +105,7 @@ export function AskAI() {
   }
 
   return (
-    <div className="rounded-3xl bg-background border border-border/60 shadow-sm overflow-hidden flex flex-col h-[600px]">
+    <div className="rounded-3xl bg-background border border-border/60 shadow-sm overflow-hidden flex flex-col h-[680px]">
       <div className="border-b border-border/60 bg-cream px-6 py-4 flex items-center gap-3">
         <span className="grid h-9 w-9 place-items-center rounded-full bg-coral text-coral-foreground">
           <Sparkles className="h-4 w-4" />
@@ -155,6 +167,17 @@ export function AskAI() {
                 ? "Ask about these 8 places, routes, food, tickets, or rain backups:"
                 : "可以询问这 8 个地点、路线、饮食、票务或雨天备份："}
             </p>
+            <div className="flex flex-wrap justify-center gap-2 mb-4">
+              {SCRIPTS[lang === "en" ? "en" : "zh"].map((s) => (
+                <button
+                  key={s.label}
+                  onClick={() => send(s.text)}
+                  className="rounded-full bg-coral px-4 py-2 text-sm font-semibold text-coral-foreground hover:bg-coral/90"
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
             <div className="grid gap-2 max-w-md mx-auto">
               {suggestions.map((s) => (
                 <button
@@ -185,7 +208,10 @@ export function AskAI() {
               {m.role === "assistant" ? (
                 <div className="prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-strong:text-foreground prose-a:text-coral">
                   {m.content ? (
-                    <ReactMarkdown>{m.content}</ReactMarkdown>
+                    <>
+                      <ReactMarkdown>{m.content.replace("[[BOOKING]]", "").trim()}</ReactMarkdown>
+                      {m.content.includes("[[BOOKING]]") && !streaming && <BookingPanel />}
+                    </>
                   ) : (
                     <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -199,6 +225,17 @@ export function AskAI() {
             </div>
           </div>
         ))}
+
+        {messages.length > 0 && !streaming && !messages.some((m) => m.content.includes("[[BOOKING]]")) && (
+          <div className="flex justify-center">
+            <button
+              onClick={() => send(lang === "en" ? "Help me book" : "帮我预订")}
+              className="rounded-full border border-border/60 px-4 py-1.5 text-xs font-medium hover:border-coral"
+            >
+              {lang === "en" ? "Help me book" : "帮我预订"}
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className="rounded-xl bg-destructive/10 text-destructive text-sm px-4 py-3">
