@@ -1,34 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, Loader2, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { useApp } from "@/lib/store";
-import { cn } from "@/lib/utils";
+import { ArrowRight, Loader2, Send, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { BookingPanel } from "@/components/BookingPanel";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { bookingChoice, destinations, journey, type Destination } from "@/lib/journey";
+import { useApp } from "@/lib/store";
+import { cn } from "@/lib/utils";
 
-type Msg = { id: string; role: "user" | "assistant"; content: string };
-
-const SUGGESTIONS_EN = [
-  "First visit, four hours, rain, local culture, and no spicy food — what fits best?",
-  "Order my saved places into a walkable afternoon.",
-  "What's the most photogenic spot at sunset?",
-];
-const SCRIPTS = {
-  en: [
-    { label: "Demo A · 4h near Taikoo Li", text: "I have four hours this afternoon near Taikoo Li. I like quiet local streets, no spicy food, and I'd rather walk. Plan it for me." },
-    { label: "Demo B · Chengdu → Jiuzhaigou", text: "I land in Chengdu at 10am. Today I want culture and mild food; tomorrow I want Jiuzhaigou, Huanglong or Songpan. Compare two options and explain the station-to-hotel transfer choices." },
-  ],
-  zh: [
-    { label: "演示 A · 太古里 4 小时", text: "我今天下午在太古里附近有四个小时，喜欢安静的本地街区，不吃辣，想步行。帮我安排。" },
-    { label: "演示 B · 成都 → 九寨沟", text: "我上午 10 点到成都，今天想看文化、吃不辣的美食；明天想去九寨沟、黄龙或松潘。比较两个方案，并说明高铁站到酒店的接驳选择。" },
-  ],
-};
-const SUGGESTIONS_ZH = [
-  "第一次来，只有四小时，下雨，想看本地文化且不吃辣，怎么安排？",
-  "把我收藏的地点排成一个可走通的下午。",
-  "傍晚哪里最适合拍照？",
-];
+type Msg = { id: string; role: "user" | "assistant"; content: string; demo?: boolean; booking?: Destination };
+const message = (role: Msg["role"], content: string, extra?: Pick<Msg, "demo" | "booking">): Msg =>
+  ({ id: crypto.randomUUID(), role, content, ...extra });
 
 export function AskAI() {
   const lang = useApp((s) => s.lang);
@@ -37,38 +19,73 @@ export function AskAI() {
   const routeIds = useApp((s) => s.routeIds);
   const rainActive = useApp((s) => s.rainActive);
   const [messages, setMessages] = useState<Msg[]>([]);
+  const [destination, setDestination] = useState<Destination>("chengdu");
+  const [stage, setStage] = useState<"idle" | "today" | "tomorrow">("idle");
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const zh = lang === "zh";
+  const copy = journey[lang];
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+    const pane = scrollRef.current;
+    if (pane) pane.scrollTop = pane.scrollHeight;
+  }, [messages, error]);
+  useEffect(() => () => abortRef.current?.abort(), []);
 
-  const suggestions = lang === "en" ? SUGGESTIONS_EN : SUGGESTIONS_ZH;
-
-  async function send(text: string) {
-    const trimmed = text.trim();
-    if (!trimmed || streaming) return;
-
-    const userMsg: Msg = { id: crypto.randomUUID(), role: "user", content: trimmed };
-    const assistantId = crypto.randomUUID();
-    setMessages((m) => [...m, userMsg, { id: assistantId, role: "assistant", content: "" }]);
-    setInput("");
-    setStreaming(true);
+  function addTurn(text: string, response: string, booking?: Destination) {
     setError(null);
+    setMessages((prev) => [...prev, message("user", text), message("assistant", response, { demo: true, booking })]);
+  }
 
+  function start() {
+    setStage("today");
+    setDestination("chengdu");
+    addTurn(copy.start, copy.today);
+  }
+
+  function selectTomorrow() {
+    setStage("tomorrow");
+    setDestination("jiuzhaigou");
+    addTurn(copy.next, copy.tomorrow);
+  }
+
+  function openBooking(scope: Destination, text: string) {
+    setDestination(scope);
+    const name = destinations[scope][lang];
+    addTurn(text, zh ? `只显示 **${name}** 的预订选项。` : `Here are the booking options for **${name}**.`, scope);
+  }
+
+  async function send() {
+    const text = input.trim();
+    if (!text || abortRef.current) return;
+    setInput("");
+    const scope = bookingChoice(text, destination);
+    if (scope === "clarify") {
+      addTurn(text, zh ? "你想查哪个目的地的预订？请只告诉我一个，例如「帮我预订成都」或「帮我预订九寨沟」。" : "Which destination would you like to book? Name one, for example ‘Help me book Chengdu’ or ‘Help me book Jiuzhaigou’.");
+      return;
+    }
+    if (scope) {
+      openBooking(scope, text);
+      return;
+    }
+
+    const user = message("user", text);
+    const assistant = message("assistant", "");
+    setMessages((prev) => [...prev, user, assistant]);
+    setError(null);
+    setStreaming(true);
     const controller = new AbortController();
     abortRef.current = controller;
-
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [...messages, userMsg].map((m) => ({ role: m.role, content: m.content })),
+          messages: [...messages, user].filter((m) => m.content && !m.booking).slice(-20)
+            .map(({ role, content }) => ({ role, content })),
           profileText: profile?.request,
           profile,
           savedIds: saves,
@@ -77,27 +94,21 @@ export function AskAI() {
         }),
         signal: controller.signal,
       });
-
-      if (!res.ok || !res.body) {
-        const err = await res.text().catch(() => "");
-        throw new Error(err || `Error ${res.status}`);
-      }
-
+      if (!res.ok || !res.body) throw new Error((await res.text()) || `HTTP ${res.status}`);
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let acc = "";
-      while (true) {
+      let answer = "";
+      for (;;) {
         const { value, done } = await reader.read();
+        answer += decoder.decode(value, { stream: !done });
+        if (answer) setMessages((prev) => prev.map((m) => m.id === assistant.id ? { ...m, content: answer } : m));
         if (done) break;
-        acc += decoder.decode(value, { stream: true });
-        setMessages((m) =>
-          m.map((msg) => (msg.id === assistantId ? { ...msg, content: acc } : msg)),
-        );
       }
-    } catch (e) {
-      if ((e as Error).name === "AbortError") return;
-      setError((e as Error).message || "Something went wrong.");
-      setMessages((m) => m.filter((msg) => msg.id !== assistantId));
+      if (!answer.trim()) throw new Error(zh ? "没有收到回复。" : "No reply was received.");
+    } catch (cause) {
+      if (controller.signal.aborted) return;
+      setError(cause instanceof Error ? cause.message : (zh ? "暂时无法连接向导。" : "The concierge is unavailable."));
+      setMessages((prev) => prev.filter((m) => m.id !== assistant.id || m.content.trim()));
     } finally {
       setStreaming(false);
       abortRef.current = null;
@@ -105,190 +116,55 @@ export function AskAI() {
   }
 
   return (
-    <div className="rounded-3xl bg-background border border-border/60 shadow-sm overflow-hidden flex flex-col h-[680px]">
-      <div className="border-b border-border/60 bg-cream px-6 py-4 flex items-center gap-3">
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-coral text-coral-foreground">
-          <Sparkles className="h-4 w-4" />
-        </span>
-        <div>
-          <p className="font-display font-semibold">
-            {lang === "en" ? "Ask your Chengdu concierge" : "问一下成都向导"}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {lang === "en"
-              ? "AI concierge demo · scoped to your taste, saves, and these 8 places"
-              : "AI 向导 Demo · 聚焦你的偏好、收藏和这 8 个地点"}
-          </p>
+    <div className="flex h-[min(720px,calc(100svh-90px))] min-h-96 flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm">
+      <header className="flex shrink-0 items-center gap-3 border-b border-border bg-cream px-4 py-3 sm:px-6">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-coral text-coral-foreground"><Sparkles className="size-4" /></span>
+        <div className="min-w-0">
+          <p className="font-display font-semibold">{zh ? "成都旅行向导" : "Chengdu concierge"}</p>
+          <p className="text-xs text-muted-foreground">{zh ? "今天在市区，明天去周边" : "Chengdu today, somewhere nearby tomorrow"}</p>
         </div>
-        <span className="ml-auto rounded-full border border-leaf/30 bg-leaf/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-leaf">
-          {lang === "en" ? "Live Lovable AI" : "Lovable AI 实时响应"}
-        </span>
-      </div>
-
-      <div className="border-b border-border/60 px-6 py-3">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="font-semibold text-foreground">
-            {lang === "en" ? "Current context" : "当前上下文"}
-          </span>
-          <ContextChip
-            label={
-              profile
-                ? `${profile.hours}h · ${profile.start}`
-                : lang === "en"
-                  ? "No taste profile"
-                  : "尚未设置偏好"
-            }
-          />
-          {profile && (
-            <ContextChip
-              label={
-                profile.diet === "no-spicy"
-                  ? lang === "en"
-                    ? "No spicy food"
-                    : "不吃辣"
-                  : profile.diet
-              }
-            />
-          )}
-          <ContextChip
-            label={lang === "en" ? `${saves.length} saved` : `已收藏 ${saves.length} 个`}
-          />
-          {rainActive && (
-            <ContextChip label={lang === "en" ? "Rain plan active" : "雨天方案已开启"} />
-          )}
-        </div>
-      </div>
-
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-        {messages.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground mb-4">
-              {lang === "en"
-                ? "Ask about these 8 places, routes, food, tickets, or rain backups:"
-                : "可以询问这 8 个地点、路线、饮食、票务或雨天备份："}
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 mb-4">
-              {SCRIPTS[lang === "en" ? "en" : "zh"].map((s) => (
-                <button
-                  key={s.label}
-                  onClick={() => send(s.text)}
-                  className="rounded-full bg-coral px-4 py-2 text-sm font-semibold text-coral-foreground hover:bg-coral/90"
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-            <div className="grid gap-2 max-w-md mx-auto">
-              {suggestions.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => send(s)}
-                  className="text-left rounded-xl border border-border/60 bg-cream/50 px-4 py-2.5 text-sm hover:border-coral hover:bg-cream transition-colors"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+      </header>
+      <div ref={scrollRef} role="log" aria-label={zh ? "行程对话" : "Trip conversation"} className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6">
+        {!messages.length && (
+          <div className="mx-auto max-w-sm py-6 text-center">
+            <p className="font-display text-xl font-semibold">{zh ? "这个下午，想怎么逛成都？" : "What does your Chengdu afternoon look like?"}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{zh ? "太古里出发 · 4 小时 · 轻松走走 · 不吃辣" : "Taikoo Li · Four hours · Easy walking · No spicy food"}</p>
+            <Button onClick={start} className="mt-5 bg-coral text-coral-foreground hover:bg-coral/90">
+              {zh ? "开始行程演示" : "Start the guided trip"} <ArrowRight className="size-4" />
+            </Button>
           </div>
         )}
-
         {messages.map((m) => (
-          <div
-            key={m.id}
-            className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
-          >
-            <div
-              className={cn(
-                "max-w-[85%] rounded-2xl px-4 py-2.5",
-                m.role === "user"
-                  ? "bg-foreground text-background"
-                  : "bg-transparent text-foreground",
-              )}
-            >
-              {m.role === "assistant" ? (
-                <div className="prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-strong:text-foreground prose-a:text-coral">
-                  {m.content ? (
-                    <>
-                      <ReactMarkdown>{m.content.replace("[[BOOKING]]", "").trim()}</ReactMarkdown>
-                      {m.content.includes("[[BOOKING]]") && !streaming && <BookingPanel />}
-                    </>
-                  ) : (
-                    <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      {lang === "en" ? "Thinking…" : "思考中……"}
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{m.content}</p>
+          <div key={m.id} className={cn("flex", m.role === "user" && "justify-end")}>
+            <div className={cn("min-w-0 text-sm leading-relaxed break-words", m.role === "user" ? "max-w-[88%] rounded-xl bg-foreground px-4 py-2.5 text-background" : "w-full")}>
+              {m.role === "user" ? <p className="whitespace-pre-wrap">{m.content}</p> : (
+                <>
+                  {m.demo && <p className="mb-1 text-xs font-medium text-muted-foreground">{zh ? "预设演示" : "Guided demo"}</p>}
+                  {m.content ? <div className="space-y-2 [&_a]:text-coral [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_li+li]:mt-1"><ReactMarkdown>{m.content}</ReactMarkdown></div> : <span className="inline-flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" />{zh ? "正在思考…" : "Thinking…"}</span>}
+                  {m.booking && <BookingPanel destination={m.booking} />}
+                </>
               )}
             </div>
           </div>
         ))}
-
-        {messages.length > 0 && !streaming && !messages.some((m) => m.content.includes("[[BOOKING]]")) && (
-          <div className="flex justify-center">
-            <button
-              onClick={() => send(lang === "en" ? "Help me book" : "帮我预订")}
-              className="rounded-full border border-border/60 px-4 py-1.5 text-xs font-medium hover:border-coral"
-            >
-              {lang === "en" ? "Help me book" : "帮我预订"}
-            </button>
-          </div>
-        )}
-
-        {error && (
-          <div className="rounded-xl bg-destructive/10 text-destructive text-sm px-4 py-3">
-            {error}
-          </div>
-        )}
+        {error && <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
       </div>
-
-      <div className="border-t border-border/60 bg-cream/40 px-6 py-2.5 text-[11px] leading-relaxed text-muted-foreground flex gap-2">
-        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-leaf" />
-        <span>
-          {lang === "en"
-            ? "Bounded to 8 curated place records. Hours, booking, and on-site details must be confirmed with the linked source."
-            : "回答范围限定为 8 条精选地点记录；开放时间、预约及现场信息仍需通过来源链接确认。"}
-        </span>
-      </div>
-
-      <form
-        className="border-t border-border/60 p-3 flex items-end gap-2 bg-background"
-        onSubmit={(e) => {
-          e.preventDefault();
-          send(input);
-        }}
-      >
-        <Textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              send(input);
-            }
-          }}
-          placeholder={
-            lang === "en" ? "Ask about a place, a route, food…" : "问问某个地点、路线、吃的……"
-          }
-          rows={1}
-          className="min-h-[44px] max-h-32 resize-none border-border/60"
-          disabled={streaming}
-        />
-        <Button
-          type="submit"
-          size="icon"
-          disabled={streaming || !input.trim()}
-          className="bg-coral text-coral-foreground hover:bg-coral/90 shrink-0"
-        >
-          {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-        </Button>
+      {stage !== "idle" && (
+        <div className="flex shrink-0 flex-wrap gap-2 border-t border-border px-3 py-2">
+          {!messages.some((m) => m.booking === "chengdu") && <Button size="sm" variant="outline" disabled={streaming} onClick={() => openBooking("chengdu", copy.bookCity)}>{copy.bookCity}</Button>}
+          {stage === "today" && <Button size="sm" disabled={streaming} onClick={selectTomorrow}>{copy.chooseRegion} <ArrowRight className="size-4" /></Button>}
+          {stage === "tomorrow" && !messages.some((m) => m.booking === "jiuzhaigou") && <Button size="sm" disabled={streaming} onClick={() => openBooking("jiuzhaigou", copy.bookRegion)}>{copy.bookRegion} <ArrowRight className="size-4" /></Button>}
+        </div>
+      )}
+      {stage === "idle" && messages.length > 0 && (
+        <div className="shrink-0 border-t border-border px-3 py-2"><Button variant="outline" size="sm" disabled={streaming} onClick={start}>{zh ? "开始行程演示" : "Start the guided trip"}</Button></div>
+      )}
+      <form className="flex shrink-0 items-end gap-2 border-t border-border bg-background p-3" onSubmit={(e) => { e.preventDefault(); void send(); }}>
+        <Textarea value={input} maxLength={2000} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); void send(); }
+        }} aria-label={zh ? "给向导发消息" : "Message the concierge"} placeholder={zh ? "问问路线、门票或吃什么…" : "Ask about routes, tickets or food…"} rows={1} className="min-h-10 max-h-24 resize-none" disabled={streaming} />
+        <Button type="submit" size="icon" aria-label={zh ? "发送" : "Send"} disabled={streaming || !input.trim()} className="size-10 shrink-0 bg-coral text-coral-foreground hover:bg-coral/90">{streaming ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}</Button>
       </form>
     </div>
   );
-}
-
-function ContextChip({ label }: { label: string }) {
-  return <span className="rounded-full bg-muted px-2.5 py-1 text-muted-foreground">{label}</span>;
 }

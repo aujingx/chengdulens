@@ -23,7 +23,6 @@ import { PlaceCard } from "@/components/PlaceCard";
 import { PlaceDetailSheet } from "@/components/PlaceDetailSheet";
 import { AskAI } from "@/components/AskAI";
 import { AnchorNav, type Section } from "@/components/AnchorNav";
-import { caseStudyBrief, caseStudyDecisions, caseStudyDocs } from "@/data/caseStudy";
 import { places, findPlace, type Place } from "@/data/places";
 import { cn } from "@/lib/utils";
 import { computeRoute, proposeRainSwaps, applySwaps, type RainProposal } from "@/lib/tripMath";
@@ -35,10 +34,14 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Turn your taste into a walkable Chengdu afternoon: 8 curated places with source-linked ticket info, transit notes, nearby food, and an AI concierge demo.",
+          "Plan a Chengdu afternoon and continue into Sichuan with a bilingual travel concierge, curated places and a clearly labeled booking simulation.",
       },
       { property: "og:title", content: "Chengdu Lens" },
-      { property: "og:description", content: "AI travel companion for first-time visitors to Chengdu." },
+      { property: "og:description", content: "From an afternoon in Chengdu to a side trip in Sichuan: try the guided journey." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: places[0].image.url },
+      { name: "twitter:image", content: places[0].image.url },
     ],
   }),
   component: Home,
@@ -46,11 +49,10 @@ export const Route = createFileRoute("/")({
 
 const SECTIONS: Section[] = [
   { id: "top", en: "Story", zh: "故事" },
+  { id: "ask-ai", en: "Concierge", zh: "向导" },
   { id: "taste", en: "Your Taste", zh: "你的偏好" },
   { id: "discover", en: "Discover", zh: "发现" },
   { id: "trip", en: "Your Trip", zh: "行程" },
-  { id: "ask-ai", en: "Ask AI", zh: "问 AI" },
-  { id: "case-study", en: "Case Study", zh: "案例" },
 ];
 
 
@@ -103,34 +105,11 @@ function Home() {
           </div>
 
           <div className="mt-10 flex flex-wrap items-center gap-3">
-            <Button
-              size="lg"
-              className="rounded-full bg-coral text-coral-foreground hover:bg-coral/90 shadow-lg shadow-coral/20"
-              onClick={() => {
-                applyDemoProfile();
-                document.getElementById("discover")?.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              {lang === "en" ? "Start with a demo taste" : "使用 Demo 偏好开始"}
-              <ArrowRight className="h-4 w-4 ml-2" />
+            <Button asChild size="lg" className="rounded-full bg-coral text-coral-foreground hover:bg-coral/90 shadow-lg shadow-coral/20">
+              <a href="#ask-ai"><Sparkles className="size-4" />{lang === "en" ? "Try the guided trip" : "体验今天到明天的行程"}<ArrowRight className="size-4" /></a>
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-full"
-              onClick={() => setProfileOpen(true)}
-            >
-              {lang === "en" ? "Build your own" : "自己填偏好"}
-            </Button>
-            <Button
-              size="lg"
-              variant="ghost"
-              className="rounded-full text-coral hover:text-coral"
-              onClick={() => document.getElementById("ask-ai")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              {lang === "en" ? "Ask live AI" : "直接问实时 AI"}
-              <ArrowRight className="h-4 w-4 ml-2" />
+            <Button asChild variant="outline" size="lg" className="rounded-full">
+              <a href="#discover">{lang === "en" ? "Explore Chengdu" : "先逛成都景点"}</a>
             </Button>
           </div>
 
@@ -174,11 +153,29 @@ function Home() {
         </div>
       </section>
 
+      {/* ASK AI */}
+      <section id="ask-ai" className="scroll-mt-16 border-t border-border/40">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-10 sm:py-14 lg:pl-32">
+          <SectionHeader
+            no="02"
+            title={lang === "en" ? "Plan with the concierge" : "跟向导一起安排行程"}
+            subtitle={
+              lang === "en"
+                ? "One conversation for your Chengdu afternoon and tomorrow’s trip."
+                : "从今天下午的成都开始，在同一段对话里接着安排明天。"
+            }
+          />
+          <div className="mt-5">
+            <AskAI />
+          </div>
+        </div>
+      </section>
+
       {/* TASTE */}
       <section id="taste" className="border-t border-border/40 bg-cream/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 lg:pl-32">
           <SectionHeader
-            no="02"
+            no="03"
             title={lang === "en" ? "Your Taste" : "你的偏好"}
             subtitle={
               lang === "en"
@@ -261,10 +258,10 @@ function Home() {
       </section>
 
       {/* DISCOVER */}
-      <section id="discover" className="border-t border-border/40">
+      <section id="discover" className="scroll-mt-16 border-t border-border/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 lg:pl-32">
           <SectionHeader
-            no="03"
+            no="04"
             title={lang === "en" ? "8 places worth your afternoon" : "值得留在下午的 8 个地点"}
             subtitle={
               lang === "en"
@@ -284,7 +281,7 @@ function Home() {
       <section id="trip" className="border-t border-border/40 bg-cream/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 lg:pl-32">
           <SectionHeader
-            no="04"
+            no="05"
             title={lang === "en" ? "Your walkable afternoon" : "你可以走完的下午"}
             subtitle={
               lang === "en"
@@ -298,124 +295,19 @@ function Home() {
         </div>
       </section>
 
-      {/* ASK AI */}
-      <section id="ask-ai" className="border-t border-border/40">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-20 lg:pl-32">
-          <SectionHeader
-            no="05"
-            title={lang === "en" ? "Ask the concierge" : "问一下向导"}
-            subtitle={
-              lang === "en"
-                ? "Ask about these 8 places, your saved route, food options, tickets, transit, and rain backups."
-                : "围绕这 8 个地点、你的收藏路线、吃什么、票务、交通和雨天备份提问。"
-            }
-          />
-          <div className="mt-10">
-            <AskAI />
-          </div>
-        </div>
-      </section>
-
-      {/* CASE STUDY */}
-      <section id="case-study" className="border-t border-border/40 bg-cream/50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 lg:pl-32">
-          <SectionHeader
-            no="06"
-            title={lang === "en" ? "Product Review" : "产品评审"}
-            subtitle={
-              lang === "en"
-                ? "First-time international visitors · Chengdu · Discovery before booking"
-                : "首次来访的国际游客 · 成都 · 先验证发现，再考虑交易"
-            }
-          />
-          <div className="mt-10 overflow-hidden rounded-3xl border border-border/60 bg-background">
-            <div className="grid md:grid-cols-[1.35fr_1fr] border-b border-border/60">
-              <div className="p-6 sm:p-8">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-coral">
-                  {lang === "en" ? "Product thesis" : "产品命题"}
-                </p>
-                <h3 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl font-semibold leading-tight">
-                  {lang === "en"
-                    ? "Turn fragmented travel content into a decision a visitor can trust and use today."
-                    : "把分散的旅行信息，转化为游客今天能够信任并执行的决策。"}
-                </h3>
-              </div>
-              <div className="border-t md:border-l md:border-t-0 border-border/60 bg-cream/45 p-6 sm:p-8">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                  {lang === "en" ? "Key decisions" : "关键决策"}
-                </p>
-                <ul className="mt-4 grid grid-cols-2 gap-3 text-sm font-medium">
-                  {caseStudyDecisions[lang].map((decision) => (
-                    <li key={decision} className="flex gap-2">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
-                      <span>{decision}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            <dl className="grid sm:grid-cols-2 lg:grid-cols-3">
-              {caseStudyBrief.map((item, index) => (
-                <div
-                  key={item.id}
-                  className={cn(
-                    "border-t border-border/60 p-6",
-                    index % 2 === 1 && "sm:border-l",
-                    index % 3 === 0 ? "lg:border-l-0" : "lg:border-l",
-                  )}
-                >
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                    {item.label[lang]}
-                  </dt>
-                  <dd className="mt-2 text-sm leading-relaxed">{item.value[lang]}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-
-          <div className="mt-12 flex items-end justify-between gap-4">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-coral">
-                {lang === "en" ? "Decision details" : "决策详情"}
-              </p>
-              <h3 className="mt-2 font-display text-3xl font-semibold">
-                {lang === "en" ? "Strategy, system, and validation" : "策略、系统与验证"}
-              </h3>
-            </div>
-          </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-2">
-            {caseStudyDocs.map((doc) => (
-              <article key={doc.id} className="rounded-3xl border border-border/60 bg-background p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="h-2 w-2 rounded-full bg-coral" />
-                  <h3 className="font-display text-2xl font-semibold">{doc.title[lang]}</h3>
-                </div>
-                <p className="text-sm leading-relaxed text-muted-foreground">{doc.summary[lang]}</p>
-                <ul className="mt-5 space-y-3">
-                  {doc.points[lang].map((point) => (
-                    <li key={point} className="flex gap-3 text-sm leading-relaxed">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-leaf" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild className="rounded-full bg-coral text-coral-foreground hover:bg-coral/90">
-              <a href="#taste">{lang === "en" ? "Replay the product flow" : "重新体验产品流程"}</a>
-            </Button>
-            <Button asChild variant="outline" className="rounded-full">
-              <a
-                href={`https://github.com/aujingx/chengdulens/blob/main/docs/product-case-study-${lang === "en" ? "en" : "cn"}.md`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {lang === "en" ? "Open full case study" : "查看完整案例"}
-              </a>
-            </Button>
-          </div>
+      <section id="case-study" className="scroll-mt-16 border-t border-border/60 bg-cream/40">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:pl-32">
+          <h2 className="font-display text-2xl font-semibold">{lang === "en" ? "About Chengdu Lens" : "关于成都漫游"}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            {lang === "en"
+              ? "A product management portfolio project for first-time international visitors. It explores how a travel concierge can turn preferences into a feasible trip, show what still needs checking, and separate planning from booking and payment."
+              : "这是一个面向首次来成都的国际自由行游客的产品经理作品。从场景定义到双语原型，重点解决三件事：让建议能执行，让不确定的信息有出处，让规划、预订和付款的状态不混淆。"}
+          </p>
+          <Button asChild variant="outline" size="sm" className="mt-4">
+            <a href={`https://github.com/aujingx/chengdulens/blob/main/docs/product-case-study-${lang === "en" ? "en" : "cn"}.md`} target="_blank" rel="noreferrer">
+              {lang === "en" ? "Product case study on GitHub" : "在 GitHub 阅读完整产品案例"}
+            </a>
+          </Button>
         </div>
       </section>
 
@@ -541,8 +433,8 @@ function TripSection({
       <div className="rounded-3xl bg-background border border-border/60 p-8">
         <p className="text-sm text-muted-foreground mb-4">
           {lang === "en"
-            ? `You've saved ${savedPlaces.length} — one more to unlock the auto-route.`
-            : `已收藏 ${savedPlaces.length} 个 —— 再加 1 个即可自动生成路线。`}
+            ? `You've saved ${savedPlaces.length}. Save ${3 - savedPlaces.length} more to build your route.`
+            : `已收藏 ${savedPlaces.length} 个，再收藏 ${3 - savedPlaces.length} 个就能生成路线。`}
         </p>
         <div className="grid sm:grid-cols-3 gap-4">
           {savedPlaces.map((p) => (

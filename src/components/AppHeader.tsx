@@ -8,14 +8,12 @@ const ANCHORS = [
   { id: "taste", en: "Taste", zh: "偏好" },
   { id: "discover", en: "Discover", zh: "发现" },
   { id: "trip", en: "Trip", zh: "行程" },
-  { id: "ask-ai", en: "Ask AI", zh: "问 AI" },
-  { id: "case-study", en: "Case Study", zh: "案例" },
+  { id: "case-study", en: "About", zh: "关于" },
 ];
 
 export function AppHeader() {
   const lang = useApp((s) => s.lang);
   const setLang = useApp((s) => s.setLang);
-  const useDemoProfile = useApp((s) => s.useDemoProfile);
   const t = dict[lang];
 
   return (
@@ -64,11 +62,11 @@ export function AppHeader() {
             <span className="text-xs font-semibold">{lang === "en" ? "中" : "EN"}</span>
           </Button>
           <Button
+            asChild
             size="sm"
-            className="hidden sm:inline-flex rounded-full bg-coral text-coral-foreground hover:bg-coral/90"
-            onClick={() => useDemoProfile()}
+            className="rounded-full bg-coral text-coral-foreground hover:bg-coral/90"
           >
-            {lang === "en" ? "Try demo" : "试用 Demo"}
+            <a href="#ask-ai">{lang === "en" ? "Try demo" : "体验行程"}</a>
           </Button>
         </div>
       </div>

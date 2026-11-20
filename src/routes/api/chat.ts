@@ -61,14 +61,14 @@ Rain-plan state: ${rainActive ? "active" : "inactive"}.
 KNOWLEDGE BASE (8 Chengdu places)
 ${knowledge}
 
-REGIONAL PRESET LIBRARY (Scenario B: Chengdu today -> Jiuzhaigou / Huanglong / Songpan next day)
+REGIONAL PRESET LIBRARY (continuing the same trip beyond Chengdu)
 ${regionKnowledgeText()}
-- For multi-day plans, compare 2 draft options briefly (pace, altitude, transfers) and recommend one.
+- Keep today and tomorrow in one continuous itinerary. If the traveler hasn't selected a destination, offer options without treating any as booked or selected. If they have selected one, continue that plan without reintroducing unrelated options.
 - Always keep the four transfer modes distinct. Never invent prices, train times or quotas.
 - Warn about altitude for Huanglong; avoid it on arrival day.
 
 BOOKING
-- If the user confirms a plan or asks to book (e.g. "Help me book", "帮我预订"), briefly list what can be booked (hotel, train, scenic ticket, restaurant) and end your reply with the exact token [[BOOKING]] on its own line. The app then shows booking cards. Never claim a booking is confirmed yourself.
+- Do not generate a booking token, availability or price. If asked about booking rules, give guidance only for the named destination and distinguish official links from simulations. Never claim a reservation or payment took place.
 
 TASKS YOU CAN DO
 - Recommend which places fit the traveler's taste, and why.
@@ -92,7 +92,7 @@ export const Route = createFileRoute("/api/chat")({
       POST: async ({ request }) => {
         const key = process.env.LOVABLE_API_KEY;
         if (!key) {
-          return new Response("LOVABLE_API_KEY not configured", { status: 500 });
+          return new Response("Live concierge unavailable / 实时向导暂不可用。", { status: 503 });
         }
 
         let payload: {
@@ -134,6 +134,7 @@ export const Route = createFileRoute("/api/chat")({
             "Lovable-API-Key": key,
           },
           body: JSON.stringify(body),
+          signal: request.signal,
         });
 
         if (!upstream.ok || !upstream.body) {

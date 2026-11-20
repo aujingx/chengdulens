@@ -8,7 +8,7 @@
 | **问题** | 内容很多，但很难快速判断是否适合自己、信息是否可信、今天是否可执行。 |
 | **产品假设** | 当适配原因、来源证据和可执行性清楚可见时，推荐更可能转化为收藏与行动。 |
 | **我的职责** | 产品策略、用户场景、Agent 与 RAG 设计、交互设计及双语 Demo 交付。 |
-| **已完成** | 偏好画像、8 个带来源地点、收藏、半日路线、雨天重规划和限定范围的 AI 向导。 |
+| **已完成** | 8 个成都地点、收藏和雨天改线；连续的成都市区＋九寨沟双语对话、按目的地展示的模拟预订及失败退款。 |
 | **下一步门槛** | 完成 5 次可用性测试和 Agent 离线评估后，再决定是否扩展到下一座城市。 |
 
 首版产品闭环：
@@ -16,6 +16,8 @@
 ```text
 Taste Profile -> 可信发现 -> 证据详情 -> 个人收藏 -> 半日路线 -> 局部重规划
 ```
+
+[体验与验收](demo-spec-cn.md) · [完整产品蓝图与验证门槛](product-roadmap-cn.md)
 
 ## 2. Problem Definition
 
@@ -56,71 +58,19 @@ Taste Profile -> 可信发现 -> 证据详情 -> 个人收藏 -> 半日路线 ->
 2. 支持推荐的证据是否可信？
 3. 今天是否真的能完成？
 
-### MVP Includes
+### 已实现与未实现
 
-- Taste Profile 与自然语言请求
-- 受控地点知识库与 RAG 检索
-- Personal Fit 与 Evidence Confidence 双评分
-- 地点证据详情和来源链接
-- 个人 Collection
-- Case Study：展示产品判断、AI Agent 逻辑和来源策略
-- 半日路线与一次局部重规划
-
-### MVP Excludes
-
-- 酒店、机票、签证、支付和完整交易闭环
-- 公开内容社区和UGC发布
-- 组团、包车和导游撮合
-- 多城市长线行程
-- 未经授权的平台评论复制或评分聚合
+已实现预置地点资料、偏好与收藏、估算路线、用户确认雨天替换，以及有明确演示标识的城市到周边连续旅程。不做真实付款、库存查询、实时报价、开放式全国攻略或用户内容社区。
 
 ## 6. Core Experience
 
-用户先完成一个轻量 Taste Profile，例如安静街区或热门地标、传统文化或当代空间、慢游或高密度探索、美食或文化优先、室内或户外偏好。
-
-示例请求：
-
-> I have four hours this afternoon. I am staying near Taikoo Li, prefer quiet local neighborhoods, do not want spicy food, and would rather walk than spend time in traffic.
-
-系统返回少量候选地点，每个地点都显示：
-
-- Why this fits
-- What to know
-- Personal Fit
-- Evidence Confidence
-- International Relevance
-- Local Relevance
-- Operational Accessibility
-- Source links
-- Save / Not for me
-
-用户收藏三到四个地点后，Agent 才生成半日路线。若用户输入“开始下雨了”或“太累了”，系统只替换受影响地点，保留用户明确确认的选择。
+今天先解决太古里周边四小时：走哪里、雨天怎么改、怎么向店家表达不吃辣。游客明确想去九寨沟后，才展开明天的高铁、公路接驳和过夜建议，再进入该目的地的预订。成都可以模拟订位；九寨沟可模拟酒店失败与退款。不会把已付款误写成已订好，也不会把景区门口和高铁站混为一处。
 
 ## 7. AI Agent Design
 
-Chengdu Lens 使用单一编排 Agent，而不是为了展示复杂度拆成多个虚拟 Agent。Agent 的职责是把模糊意图转化为可观察的任务状态，并在推荐前完成检索、约束验证和证据检查。
+原型使用一个向导：自由提问带入预置记录、偏好和上下文；预设演示不依赖模型。预订选项由游客的操作决定，不由模型输出触发。能解释的是推荐依据、风险和待核对事项，不展示内部推理。更完整的 RAG、证据索引、天气/地图服务和可执行性检查是未来设计，不是已上线工具。
 
-Agent 工作流：
-
-```text
-解析请求 -> 建立任务状态 -> 检索候选 -> 检查证据
--> 验证硬约束 -> 排序与解释 -> 收藏 -> 路线 -> 局部重规划
-```
-
-Agent 使用工具：
-
-- Place Knowledge Base / RAG
-- Evidence Index
-- Map Adapter
-- Weather Adapter
-- Opening Status Checker
-- International Access Checker
-- Preference Memory
-- Collection State
-
-LLM 负责意图理解、标签归一和解释文案；确定性规则负责硬约束、排除、评分边界和路线可行性。Demo 不展示隐藏思维链，只展示结构化决策摘要。
-
-完整系统设计见 [AI Agent 系统设计](agent-system-design-cn.md)。
+[AI Agent 系统设计](agent-system-design-cn.md)
 
 ## 8. Data and Trust Model
 
@@ -180,5 +130,5 @@ LLM 负责意图理解、标签归一和解释文案；确定性规则负责硬�
 
 - 当前用户场景是可验证假设，而非真实访谈数据。
 - 地点数据尚未完成公开级来源登记。
-- 地图、天气和实时营业状态在 Demo 中使用模拟适配器。
+- Demo 不提供实时地图、天气、营业或库存查询。
 - 产品价值还没有通过真实激活率、收藏率和路线转化率验证。

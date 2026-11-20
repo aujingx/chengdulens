@@ -8,7 +8,7 @@
 | **Problem** | Plenty of content, but no quick way to judge personal fit, source quality, and what is practical today. |
 | **Product bet** | A recommendation is more likely to be saved when fit, evidence, and feasibility are visible. |
 | **My role** | Product strategy, user scenarios, Agent and RAG design, UX, and bilingual demo delivery. |
-| **Shipped** | Taste profile, 8 source-linked places, saves, half-day route, rain replan, and a scoped AI concierge. |
+| **Shipped** | Eight Chengdu places, saves and rain replanning; a continuous bilingual Chengdu-to-Jiuzhaigou journey with destination-scoped booking and simulated refunds. |
 | **Next gate** | 5 usability tests and an offline Agent evaluation set before expanding to another city. |
 
 First product loop:
@@ -16,6 +16,8 @@ First product loop:
 ```text
 Taste Profile -> Trusted Discovery -> Evidence Detail -> Personal Collection -> Half-Day Route -> Local Replan
 ```
+
+[Demo walkthrough](demo-spec-en.md) · [Full product roadmap and validation gates](product-roadmap-en.md)
 
 ## 2. Problem Definition
 
@@ -56,71 +58,19 @@ Whether a user saves and acts on a recommendation depends not only on whether th
 2. Is the supporting evidence trustworthy?
 3. Can I actually complete it today?
 
-### MVP Includes
+### Shipped and not shipped
 
-- Taste Profile and natural-language request
-- Controlled place knowledge base and RAG retrieval
-- Separate Personal Fit and Evidence Confidence scores
-- Place evidence detail and source links
-- Personal Collection
-- Case Study section showing product judgment, AI Agent logic, and evidence boundaries
-- Half-day route and one local replan
-
-### MVP Excludes
-
-- Hotels, flights, visas, payments, and full transaction flow
-- Public content community and UGC publishing
-- Group tours, car booking, and guide matching
-- Multi-city long-trip planning
-- Unauthorized copying of platform reviews or rating aggregation
+Shipped: curated places, preferences and saves, route estimates, explicit rain-plan approval and a clearly labeled city-to-region guided journey. Out of scope: actual payment, live inventory or pricing, open-ended nationwide coverage and a user-content community.
 
 ## 6. Core Experience
 
-The user first completes a lightweight Taste Profile, such as quiet neighborhoods or famous landmarks, traditional culture or contemporary spaces, slow exploration or dense schedule, food-first or culture-first, indoor or outdoor preference.
-
-Example request:
-
-> I have four hours this afternoon. I am staying near Taikoo Li, prefer quiet local neighborhoods, do not want spicy food, and would rather walk than spend time in traffic.
-
-The system returns a small set of candidate places. Each place shows:
-
-- Why this fits
-- What to know
-- Personal Fit
-- Evidence Confidence
-- International Relevance
-- Local Relevance
-- Operational Accessibility
-- Source links
-- Save / Not for me
-
-Only after the user saves three to four places does the Agent generate a half-day route. If the user says "it started raining" or "I am tired," the system replaces only the affected places and preserves the user's explicitly confirmed choices.
+Start with four hours near Taikoo Li: where to walk, what to do if it rains, and how to ask for non-spicy food. Once the traveler chooses Jiuzhaigou, explain tomorrow’s rail, road transfer and overnight plan before opening options for that destination. Chengdu offers a table-request simulation; Jiuzhaigou demonstrates hotel failure and refund. Payment is not confirmation, and the railway station is not the park entrance.
 
 ## 7. AI Agent Design
 
-Chengdu Lens uses a single orchestrating Agent instead of splitting into multiple virtual agents just to show complexity. The Agent's job is to turn ambiguous intent into observable task state, then retrieve, validate constraints, and check evidence before recommending.
+The prototype uses one concierge: free-text chat takes curated records, preferences and conversation context; the guided walkthrough does not depend on the model. Booking scope comes from user actions, not model output. The UI surfaces evidence, risks and outstanding checks, not hidden reasoning. Full RAG, an evidence index, live map/weather adapters and automated feasibility checks are future design, not shipped tools.
 
-Agent workflow:
-
-```text
-Parse request -> Build task state -> Retrieve candidates -> Check evidence
--> Validate hard constraints -> Rank and explain -> Save -> Route -> Local replan
-```
-
-Agent tools:
-
-- Place Knowledge Base / RAG
-- Evidence Index
-- Map Adapter
-- Weather Adapter
-- Opening Status Checker
-- International Access Checker
-- Preference Memory
-- Collection State
-
-The LLM handles intent understanding, tag normalization, and explanatory copy. Deterministic rules handle hard constraints, exclusions, scoring boundaries, and route feasibility. The demo does not show hidden chain-of-thought; it only shows structured decision summaries.
-
-See [AI Agent System Design](agent-system-design-en.md) for the full system design.
+[AI Agent System Design](agent-system-design-en.md)
 
 ## 8. Data and Trust Model
 
@@ -180,5 +130,5 @@ See [Research & Evidence Appendix](research-evidence-appendix-en.md) for researc
 
 - Current user scenarios are testable hypotheses, not real interview data.
 - Place data has not yet completed public-level source registration.
-- Map, weather, and real-time opening status use simulated adapters in the demo.
+- The demo has no live map, weather, hours or inventory integration.
 - Product value has not yet been validated through real activation rate, save rate, or route conversion rate.

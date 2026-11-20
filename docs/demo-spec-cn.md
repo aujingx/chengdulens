@@ -1,125 +1,25 @@
-# Chengdu Lens Demo 规格
+# Chengdu Lens · 演示验收
 
-## 1. Demo Objective
+[完整产品蓝图](product-roadmap-cn.md)说明未来设想；本页仅覆盖已实现的演示。
 
-网站需要在两分钟内证明一个产品闭环：
+## 场景与主线
 
-```text
-建立品味 -> 查看可信推荐 -> 收藏地点 -> 生成路线 -> 局部重规划 -> 理解产品判断
-```
+首次到成都的国际自由行游客，今天下午从太古里出发，有四小时、想轻松走、不吃辣；同一段旅程明天可延伸到九寨沟。先解决今天，再让游客主动选明天，而不是两套互不相干的案例。
 
-目标不是展示所有旅游功能，而是让评审看到：
+| 操作 | 应看到的结果 |
+| --- | --- |
+| 从首页或顶部点「体验行程」，再点「开始行程演示」 | 同一聊天中出现太古里、大慈寺、方所、用餐及雨天备选；标注为预设演示 |
+| 点「看看今天的成都预订」 | 只出现成都的模拟订位，不出现九寨沟卡片；操作后明确没有实际提交 |
+| 点「明天去九寨沟」 | 保留今天的对话，新增明天高铁到站、另走公路及过夜建议；不承诺班次和余票 |
+| 点「看看九寨沟预订」 | 只给与九寨沟相关的酒店模拟、铁路和景区查询入口 |
+| 获取模拟报价 → 确认 → 模拟付款成功但订房失败 → 发起退款 | 明确这是模拟，最终显示已模拟退款、预订取消；不扣款、不创建真实订单 |
+| 输入「帮我预订」或明确指定目的地 | 默认是成都，选择外地后跟随已选目的地；同时指定多个地点时先澄清 |
+| 模拟 AI 不可用 | 预设主线和本地模拟不受影响，自由提问显示实际错误而不是伪装成实时答案 |
+| 切换英文；在窄屏走同一流程 | 入口、关键操作、状态和结果在中英文中都可用 |
 
-- 用户分层是否清楚。
-- AI 辅助产品概念是否有明确边界。
-- 推荐是否能说明来源、适配理由和下一步行动。
-- MVP 取舍是否克制。
+## 补充体验与范围
 
-## 2. Current Website Structure
-
-当前实现采用单页官网，而不是多个独立产品 tab：
-
-1. Hero / Story
-2. Your Taste
-3. Discover
-4. Your Trip
-5. Ask AI
-6. Case Study
-
-这和早期六视图产品设计不同，但产品闭环一致。单页结构是为了让作品集阅读更顺。
-
-## 3. Default Scenario
-
-默认演示只使用一个稳定场景：
-
-> First-time international visitor. Four hours this afternoon. Starting near Taikoo Li. Prefers quiet local neighborhoods, photogenic spaces, no spicy food, walking preferred, indoor backup needed if raining.
-
-其他国际游客场景保留为研究假设和未来测试任务，不作为官网主流程。
-
-## 4. Core Sections
-
-### 1. Your Taste
-
-- Demo Profile 按钮。
-- 品味和约束字段。
-- 时间、出发点、饮食、步行和雨天备选条件。
-- 明确展示 demo 场景边界。
-
-### 2. Discover
-
-- 展示 8 个精选成都地点。
-- 每张卡展示图片、名称、类型、区域、quick facts 和一句话 fit reason。
-- 地点详情抽屉展示更深介绍、周边推荐、票务信息、交通提示和证据指标。
-- 不复制第三方评论、用户名、头像或未经授权评分。
-
-### 3. Your Trip
-
-- 收藏形成轻量个人 Collection。
-- 至少收藏三个地点后展示路线时间轴。
-- 雨天重规划替换受影响的户外强依赖站点，同时保留整体路线形状。
-
-### 4. Ask AI
-
-- Lovable AI Gateway 可用时启用。
-- AI 助手范围限定在 demo profile、已收藏地点和 8 条地点记录中。
-- 应描述为 AI concierge demo，不应描述为完整旅行服务。
-
-### 5. Case Study
-
-- 解释产品案例、AI Agent 设计和路线图。
-- 说明为什么选择成都、为什么缩小范围、为什么从发现与路线闭环开始。
-- 展示来源策略、推荐逻辑和后续迭代计划。
-
-## 5. Agent Logic
-
-网站简化了可见 Agent Workspace，但产品设计仍遵循以下逻辑：
-
-1. Understood
-2. Retrieved
-3. Checked
-4. Excluded
-5. Recommended
-6. Next Action
-
-硬性约束先作为 gate，再进入评分。即使卡片 UI 做了简化，Personal Fit 和 Evidence Confidence 在产品逻辑上仍然分离。
-
-## 6. Data Scope
-
-首版使用 8 条 inline 成都地点记录，用于支撑完整浏览、收藏、路线和 Ask AI 流程。
-
-数据设计原则：
-
-- 事实型信息优先保留可追溯来源链接。
-- 第三方平台内容只作为外链入口，不复制评论、用户名、头像或未经授权评分。
-- AI 回复范围限定在地点记录、用户偏好和收藏路线中。
-- 路线时间、票务和开放规则在前台以轻量提示展示，不进入交易闭环。
-
-## 7. Event Tracking
-
-Demo 阶段使用本地事件记录即可：
-
-- `taste_profile_completed`
-- `request_submitted`
-- `place_viewed`
-- `evidence_detail_viewed`
-- `source_opened`
-- `place_saved`
-- `place_rejected`
-- `route_generated`
-- `replan_triggered`
-- `place_replaced`
-- `map_fallback_shown`
-
-这些事件对应激活、信任参与、收藏转化、路线转化和重规划成功。
-
-## 8. Acceptance Criteria
-
-- 评审能在第一屏理解产品价值。
-- 用户可以应用 demo profile 并浏览 8 个地点。
-- 用户可以打开地点详情。
-- 用户可以收藏至少三个地点并看到路线时间轴。
-- 用户可以触发雨天重规划。
-- 顶部导航可以进入 Case Study。
-- Demo 和文档不暗示已完成真实验证、实时路线、实时营业状态或商业上线。
-- 核心浏览和路线体验不依赖 AI key；Ask AI 依赖 Lovable AI Gateway 可用性。
-- 中英文模式不混杂 UI 文案，必要产品术语除外。
+- 独立浏览 8 条带来源的成都地点，打开详情、查看附近推荐和交通；收藏至少三处生成估算路线。雨天替换先让用户确认，保留标记为必去的点。
+- 自由提问使用实时 AI，依赖服务可用；只注入策展资料及当前对话和偏好，不访问实时地图、天气或库存。
+- 官方链接供访客自行核实。未知票价、班次、接驳和余票不应被写为事实；模拟价格不代表真实市场价。
+- 双语界面和点击流程验收不等于用户研究或商业上线。

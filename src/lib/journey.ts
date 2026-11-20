@@ -12,7 +12,7 @@ export type BookingChoice = Destination | "clarify";
 // Booking is an explicit user action, never inferred from an assistant reply.
 export function bookingChoice(text: string, selected: Destination): BookingChoice | null {
   const cleaned = text.replace(/黄龙九寨(?:高铁)?站|huanglong jiuzhai (?:railway )?station/gi, "");
-  if (!/预订|订票|订酒店|订房|订位|\b(?:book|reserve|reservation)\b/i.test(cleaned)) return null;
+  if (!/预订|订票|订酒店|订房|订位|(?:帮我|想|要)订|\b(?:book|reserve|reservation)\b/i.test(cleaned)) return null;
   if (/不(?:用|要|想)(?:再)?(?:预订|订票|订房)|\b(?:don.t|do not|not ready to)\s+(?:book|reserve)\b/i.test(cleaned)) return null;
   const matches: Destination[] = [];
   if (/成都|太古里|宽窄巷子|市区|chengdu|taikoo li|downtown/i.test(cleaned)) matches.push("chengdu");
@@ -21,6 +21,7 @@ export function bookingChoice(text: string, selected: Destination): BookingChoic
   if (/松潘|songpan/i.test(cleaned)) matches.push("songpan");
   if (matches.length > 1) return "clarify";
   if (matches.length === 1) return matches[0];
+  if (/今天|\btoday\b/i.test(cleaned) && !/明天|\btomorrow\b/i.test(cleaned)) return "chengdu";
   // Only context-only requests can directly reopen a previously selected destination.
   if (/^(?:帮我)?(?:预订|订票|订房|订酒店|订位)(?:吧|一下)?[。！!？?]?$|^(?:help me )?(?:book|reserve)(?: it| this)?[.!?]?$/i.test(cleaned.trim())) return selected;
   return "clarify";

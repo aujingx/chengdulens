@@ -1,125 +1,25 @@
-# Chengdu Lens Demo Specification
+# Chengdu Lens · Demo acceptance
 
-## 1. Demo Objective
+The [product roadmap](product-roadmap-en.md) is a proposal. This page covers the implemented prototype only.
 
-The website needs to prove one product loop within two minutes:
+## Scenario and walkthrough
 
-```text
-Build taste -> View trusted recommendations -> Save places -> Generate route -> Local replan -> Understand product decisions
-```
+A first-time international visitor has four hours near Taikoo Li this afternoon, prefers easy walking and avoids spicy food. They can continue the same trip to Jiuzhaigou tomorrow; it is not a separate case.
 
-The goal is not to show every travel feature, but to let reviewers see:
+| Action | Expected result |
+| --- | --- |
+| From the homepage, choose Try demo and Start the guided trip | The conversation shows Taikoo Li, Daci Temple, Fangsuo, dinner guidance and a rain option, labeled as a guided demo |
+| Open Chengdu booking options | Only a Chengdu table-request simulation appears. It confirms that nothing was sent |
+| Choose Go to Jiuzhaigou tomorrow | Today's conversation remains; tomorrow gains rail, an onward road transfer and overnight guidance, not promised train times or availability |
+| Open Jiuzhaigou booking options | Only related hotel simulation and official rail and park links appear |
+| Get a demo price → confirm → simulate payment success with hotel failure → refund | The booking remains unconfirmed and ends cancelled with a simulated refund. No real order or charge |
+| Type Help me book or name a destination | Default to Chengdu unless a destination was selected. Clarify when multiple destinations are mentioned |
+| Make live AI unavailable | The guided journey and checkout remain usable. Free-text chat reports the problem rather than presenting a scripted answer as live AI |
+| Switch to Chinese and repeat on a narrow screen | The same entry, actions and outcomes are usable in both languages |
 
-- Clear user segmentation.
-- An AI-assisted product concept with scoped behavior.
-- Recommendations that explain source signals, fit reasons, and next actions.
-- Disciplined MVP trade-offs.
+## Additional paths and limits
 
-## 2. Current Website Structure
-
-The current implementation uses a single-page website rather than separate product tabs:
-
-1. Hero / Story
-2. Your Taste
-3. Discover
-4. Your Trip
-5. Ask AI
-6. Case Study
-
-This differs from the earlier six-view product design, but the product loop is the same. The single-page structure is intentional for portfolio readability.
-
-## 3. Default Scenario
-
-The demo uses one stable scenario:
-
-> First-time international visitor. Four hours this afternoon. Starting near Taikoo Li. Prefers quiet local neighborhoods, photogenic spaces, no spicy food, walking preferred, indoor backup needed if raining.
-
-Other international traveler scenarios are kept as research hypotheses and future test cases, not the primary website flow.
-
-## 4. Core Sections
-
-### 1. Your Taste
-
-- Demo Profile button.
-- Taste and constraint fields.
-- Time, start point, diet, walking, and weather-backup conditions.
-- Clear demo scenario boundary.
-
-### 2. Discover
-
-- Shows 8 curated Chengdu places.
-- Each card shows image, name, category, area, quick facts, and a concise fit reason.
-- Place detail sheet contains deeper information, nearby recommendations, ticket info, transit notes, and evidence metrics.
-- No copied third-party reviews, usernames, avatars, or unauthorized ratings.
-
-### 3. Your Trip
-
-- Saves become a lightweight personal collection.
-- Saving at least three places unlocks a route timeline.
-- Rain replanning replaces affected outdoor-heavy stops while preserving the route shape.
-
-### 4. Ask AI
-
-- Uses Lovable AI Gateway when available.
-- The assistant is scoped to the demo profile, saved places, and 8 place records.
-- It should be described as an AI concierge demo, not a production travel assistant.
-
-### 5. Case Study
-
-- Explains the product case, AI Agent design, and roadmap.
-- Shows why Chengdu was selected, why the scope is narrow, and why discovery plus routing is the first loop.
-- Presents the source strategy, recommendation logic, and iteration plan.
-
-## 5. Agent Logic
-
-The website simplifies the visible Agent Workspace, but the product design still follows this logic:
-
-1. Understood
-2. Retrieved
-3. Checked
-4. Excluded
-5. Recommended
-6. Next Action
-
-Hard constraints act as gates before scoring. Personal Fit and Evidence Confidence remain conceptually separate even when the card UI is simplified.
-
-## 6. Data Scope
-
-The first version uses 8 inline Chengdu place records to support the full browsing, saving, routing, and Ask AI flow.
-
-Data design principles:
-
-- Factual fields should keep traceable source links.
-- Third-party platforms are used as outbound source links; the product does not copy reviews, usernames, avatars, or unauthorized ratings.
-- AI answers are scoped to place records, user preferences, and saved routes.
-- Route times, ticket notes, and opening rules are shown as lightweight guidance, not as a transaction flow.
-
-## 7. Event Tracking
-
-Local event logging is sufficient for the demo:
-
-- `taste_profile_completed`
-- `request_submitted`
-- `place_viewed`
-- `evidence_detail_viewed`
-- `source_opened`
-- `place_saved`
-- `place_rejected`
-- `route_generated`
-- `replan_triggered`
-- `place_replaced`
-- `map_fallback_shown`
-
-Events map to activation, trust engagement, save conversion, route conversion, and replan success.
-
-## 8. Acceptance Criteria
-
-- Reviewer can understand the value proposition within the first screen.
-- User can apply the demo profile and browse 8 places.
-- User can open place details.
-- User can save at least three places and see a route timeline.
-- User can trigger a rain replan.
-- Case Study is available from the top navigation.
-- Demo and document claims do not imply live validation, live routing, real-time opening status, or commercial launch.
-- Core browsing and route experience work without an AI key; Ask AI depends on Lovable AI Gateway availability.
-- English and Chinese modes do not mix UI copy beyond necessary product terms.
+- Browse eight source-linked Chengdu places; view nearby recommendations and transport. Save at least three to build an estimate. Confirm proposed rain swaps before they are applied; keep must-visit stops.
+- Free-text questions go to live AI when available, with curated records, preferences and conversation context. There is no live routing, weather or stock integration.
+- Official links are for independent verification. Do not treat demo prices, unverified schedules, availability or transfers as market facts.
+- Walkthrough checks are not user research or evidence of commercial readiness.

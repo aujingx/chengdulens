@@ -1,93 +1,42 @@
-# Chengdu Lens
+# Chengdu Lens · 成都漫游
 
-**AI city-discovery concierge demo for first-time international independent travelers in Chengdu**
+> 帮第一次来四川的国际自由行游客，把「今天去哪、明天怎么去」变成一段能执行的旅程。
+>
+> A bilingual travel concierge prototype for first-time international visitors to Sichuan.
 
-Live site: https://chengdulens.lovable.app
+**[体验 Demo / Open the demo](https://chengdulens.lovable.app)** · **[中文产品案例](docs/product-case-study-cn.md)** · **[English case study](docs/product-case-study-en.md)**
 
-Chengdu Lens explores a focused travel-product question:
+## 两分钟体验 / Two-minute walkthrough
 
-> When a first-time international visitor comes to Chengdu, how can an AI product help them decide which places fit their taste, why those recommendations are trustworthy, and how to turn saves into a realistic half-day plan?
+1. 点「体验行程」，再点「开始行程演示」：从太古里出发，四小时、轻松走、不吃辣。
+2. 点「看看今天的成都预订」：只出现成都订位演示，不会出现外地酒店。
+3. 在同一段对话点「明天去九寨沟」：先看高铁、接驳、过夜与入园如何衔接，再打开当地预订。
+4. 在酒店卡获取模拟报价，试一次「模拟付款成功但订房失败」和退款。官方外链只供自行核对；站内不发起付款或真实预约。
 
-This repository contains the interactive website and supporting product documentation. The website is the primary portfolio surface; the documents explain the product judgment behind it.
+Start the guided trip, open today's Chengdu booking options, and choose Jiuzhaigou for tomorrow in the same conversation. Open the Jiuzhaigou options to simulate a hotel payment, supplier failure and refund. The preset walkthrough works without live AI; free-text travel questions use live AI when available.
 
-## Current Demo
+## 产品取舍 / Product decisions
 
-The live demo is a single-page product experience:
+| 决策 / Decision | 本版交付 / Shipped | 尚未实现 / Not shipped |
+| --- | --- | --- |
+| 先解决决策，再介入交易 / Decisions before transactions | 双语地点资料、收藏、估算路线；按天延续的向导对话 | 实时地图路线、库存和自动购票 |
+| 事实与建议分开 / Separate facts from advice | 人工维护地点记录和核对入口；不编造可用性 | 商业数据授权、自动检索与核验 |
+| 付款不等于预订成功 / Payment ≠ confirmation | 按目的地展示选项，本地模拟确认与退款 | 真实扣款、供应商履约、售后与对账 |
 
-1. **Hero / Story**: explains the product promise and demo boundary.
-2. **Your Taste**: applies a first-time international visitor scenario.
-3. **Discover**: shows 8 curated Chengdu places with images, quick facts, and fit reasons.
-4. **Your Trip**: turns saved places into a lightweight route and supports rain replanning.
-5. **Ask AI**: provides an AI concierge demo scoped to the 8 places, the profile, and saved places.
-6. **Case Study**: summarizes product decisions, AI Agent logic, evidence boundaries, and roadmap.
+## 文档 / Documentation
 
-## Product Strategy
+- **[完整产品蓝图（中文）](docs/product-roadmap-cn.md)** / **[Product strategy and roadmap](docs/product-roadmap-en.md)** — 目标用户、产品边界、阶段规划、指标、风险与上线门槛。
+- [产品案例](docs/product-case-study-cn.md) / [Case study](docs/product-case-study-en.md) — 产品判断与个人职责。
+- [演示验收](docs/demo-spec-cn.md) / [Demo acceptance](docs/demo-spec-en.md) — 可复现的关键路径、异常和双语检查。
+- [Agent 设计](docs/agent-system-design-cn.md) / [Agent design](docs/agent-system-design-en.md) — 长期设计，不代表已全部实现。
+- [研究与证据](docs/research-evidence-appendix-cn.md) / [Research & evidence](docs/research-evidence-appendix-en.md) · [Agent 评估](docs/agent-evaluation-cases-cn.md) / [Evaluation cases](docs/agent-evaluation-cases-en.md) — 假设与测试设计，不是上线成效。
 
-Chengdu Lens is not trying to become a full OTA, booking marketplace, or generic global travel search product.
-
-The first product bet is narrower:
-
-- **Discovery before transactions**: help users decide what is worth saving before handling booking or payment.
-- **Fit before popularity**: show why a place matches the user's current situation.
-- **Evidence before fluency**: avoid unsupported claims, copied reviews, or hidden ranking.
-- **Local replanning before full itinerary generation**: preserve confirmed choices and only replace affected stops.
-
-## AI Product Design
-
-The demo uses a simplified website interface, but the intended AI product logic is:
-
-```text
-Understand request -> Retrieve candidate places -> Check constraints
--> Explain evidence -> Save choices -> Build route -> Locally replan
-```
-
-Key design decisions:
-
-- Use one orchestrating Agent rather than artificial multi-agent complexity.
-- Keep hard constraints as gates before scoring.
-- Keep Personal Fit and Evidence Confidence conceptually separate.
-- Treat Chinese local platform signals, international traveler signals, and official facts as different evidence layers.
-- Link to third-party platforms instead of copying reviews, usernames, avatars, or unauthorized ratings.
-
-## Roadmap
-
-### Now
-
-- Polish the Chengdu-focused demo.
-- Keep the Case Study visible on the website.
-- Make the README and documentation explain product judgment clearly.
-- Avoid unsupported claims about real-time data or completed user validation.
-
-### Next
-
-- Register sources for 20 Chengdu places.
-- Run 5 lightweight usability tests with international-travel-experience users.
-- Create an offline Agent evaluation set for constraints, evidence grounding, and replanning.
-- Improve the Case Study with observed usability findings.
-
-### Later
-
-- Test 2-3 city archetypes instead of expanding everywhere:
-  - Chengdu: lifestyle and local rhythm
-  - Shanghai: international urban discovery
-  - Xi'an: historical and cultural route planning
-- Build a city-expansion framework for place schema, evidence policy, and route patterns.
-- Consider national or global coverage only after the city framework proves repeatable.
-
-## Documentation
-
-- [Product Case Study](docs/product-case-study-en.md) / [中文](docs/product-case-study-cn.md)
-- [AI Agent System Design](docs/agent-system-design-en.md) / [中文](docs/agent-system-design-cn.md)
-- [Research & Evidence Appendix](docs/research-evidence-appendix-en.md) / [中文](docs/research-evidence-appendix-cn.md)
-- [Demo Specification](docs/demo-spec-en.md) / [中文](docs/demo-spec-cn.md)
-- [Agent Evaluation Cases](docs/agent-evaluation-cases-en.md) / [中文](docs/agent-evaluation-cases-cn.md)
-
-## Development
+## Local development
 
 ```sh
 bun install
-bun run build
 bun run dev
+bun test src/lib/journey.test.ts
 ```
 
-Built with TanStack Start, React, TypeScript, Tailwind CSS, and Lovable.
+Built with TanStack Start, React, TypeScript and Tailwind CSS. The guided journey and simulated checkout need no credentials; live chat requires a server-side `LOVABLE_API_KEY`.
