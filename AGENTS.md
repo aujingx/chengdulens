@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the guided journey and checkout simulation independent of live AI and payment services so the portfolio flow remains reproducible.
+- Resolve booking scope from user actions and typed destination matches, not model tokens, so generated text cannot open unrelated inventory.
