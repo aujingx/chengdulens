@@ -1,3 +1,5 @@
+import jinliPhoto from "@/assets/jinli.asset.json";
+
 export type NearbyItem = {
   name: string;
   nameZh: string;
@@ -476,10 +478,10 @@ export const places: Place[] = [
     name: "Jinli Ancient Street",
     zhName: "锦里古街",
     image: {
-      url: "https://commons.wikimedia.org/wiki/Special:FilePath/Jinli_Street_Chengdu.jpg?width=1200",
-      alt: "Jinli Ancient Street in Chengdu",
-      source: "Wikimedia Commons",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Jinli_Street_Chengdu.jpg",
+      url: jinliPhoto.url,
+      alt: "Entrance plaque at Jinli Ancient Street, Chengdu",
+      source: "Visitor photo · 用户实拍",
+      sourceUrl: jinliPhoto.url,
     },
     category: "Traditional Street",
     categoryZh: "传统街区",
@@ -527,6 +529,20 @@ export const places: Place[] = [
     demoPersonalFit: 68,
     demoEvidenceConfidence: 62,
     x: 40, y: 68,
+  },
+  {
+    id: "fangsuo-bookstore", name: "Fangsuo Bookstore", zhName: "方所书店",
+    image: { url: "", alt: "Fangsuo Bookstore", source: "", sourceUrl: "" },
+    category: "Bookstore", categoryZh: "书店 · 室内", area: "Taikoo Li", duration: 45, distanceFromStartMin: 5,
+    tags: ["indoor", "books", "rain backup"], whyFits: "An indoor stop under Taikoo Li on a rainy afternoon.", whyFitsZh: "在太古里地下逛书店，雨天也能慢下来。",
+    intro: "Browse books, design objects and the spacious underground reading area at Taikoo Li.", introZh: "在太古里地下逛书籍、设计物件和宽敞的阅读空间。",
+    bestTime: "Afternoon; confirm opening hours.", bestTimeZh: "下午前往；先核对营业时间。",
+    ticket: { price: "Free", priceZh: "免费", hours: "Check with the shop" },
+    transit: { metro: "Chunxi Road", metroZh: "春熙路站", walkMin: 5, tips: "Follow signs for Taikoo Li B1.", tipsZh: "按太古里 B1 指示前往。" },
+    nearby: [{ name: "Taikoo Li cafés", nameZh: "太古里咖啡店", kind: "cafe", note: "Take a coffee break before the next stop.", noteZh: "下一站之前可以坐下来喝杯咖啡。", walkMin: 5 }],
+    whatToKnow: "Check the opening hours on the day.", whatToKnowZh: "以当日营业时间为准。", notFor: "Outdoor walks", risk: "Store opening hours may change.", riskZh: "营业时间可能变动。",
+    sourceSummary: "Taikoo Li location reference.", sources: [{ label: "Taikoo Li Chengdu", type: "reference", url: "https://en.wikipedia.org/wiki/Sino-Ocean_Taikoo_Li_Chengdu" }],
+    internationalRelevance: "Medium", localRelevance: "High", operationalAccessibility: "Check opening hours", evidenceGrade: "B", spiceRisk: "none", indoor: true, photogenic: true, demoPersonalFit: 80, demoEvidenceConfidence: 70, x: 60, y: 58,
   },
 ];
 

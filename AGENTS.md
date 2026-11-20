@@ -11,3 +11,4 @@
 
 - Keep the guided journey and checkout simulation independent of live AI and payment services so the portfolio flow remains reproducible.
 - Resolve booking scope from user actions and typed destination matches, not model tokens, so generated text cannot open unrelated inventory.
+- Keep one browser-persisted planner draft for both manual choices and guided completion, with separate fair-weather and rain stop selections so switching weather is reversible.

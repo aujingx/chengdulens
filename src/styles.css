@@ -151,3 +151,52 @@
   border: 1px solid var(--border);
   box-shadow: 0 1px 2px oklch(0 0 0 / 0.03), 0 8px 24px -12px oklch(0.24 0.02 160 / 0.08);
 }
+
+@theme inline {
+  --color-planner-green: var(--planner-green);
+  --color-planner-on-green: var(--planner-on-green);
+  --color-planner-mint: var(--planner-mint);
+  --color-planner-wash: var(--planner-wash);
+  --color-planner-orange: var(--planner-orange);
+  --color-planner-scrim: var(--planner-scrim);
+  --color-planner-photo-text: var(--planner-photo-text);
+}
+
+:root {
+  --planner-green: oklch(0.36 0.077 161);
+  --planner-on-green: oklch(0.99 0.007 150);
+  --planner-mint: oklch(0.93 0.038 157);
+  --planner-wash: oklch(0.978 0.009 155);
+  --planner-orange: oklch(0.46 0.112 41);
+  --planner-scrim: oklch(0.15 0.031 155);
+  --planner-photo-text: oklch(0.99 0.008 93);
+}
+
+.dark {
+  --background: oklch(0.21 0.018 155);
+  --foreground: oklch(0.94 0.012 151);
+  --card: oklch(0.25 0.019 154);
+  --card-foreground: var(--foreground);
+  --cream: oklch(0.24 0.015 155);
+  --surface: var(--card);
+  --secondary: oklch(0.31 0.027 155);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--secondary);
+  --muted-foreground: oklch(0.76 0.022 155);
+  --accent: var(--secondary);
+  --accent-foreground: var(--foreground);
+  --border: oklch(0.37 0.028 155);
+  --input: var(--border);
+  --planner-green: oklch(0.80 0.09 155);
+  --planner-on-green: oklch(0.22 0.04 155);
+  --planner-mint: oklch(0.32 0.07 155);
+  --planner-wash: oklch(0.23 0.022 155);
+  --planner-orange: oklch(0.78 0.10 49);
+}
+
+@layer base {
+  h1, h2, h3, h4 { letter-spacing: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+}
