@@ -1,3 +1,4 @@
+import { PMViewSheet } from "@/components/PMViewSheet";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
@@ -303,6 +304,7 @@ function Home() {
               ? "A product management portfolio project for first-time international visitors. It explores how a travel concierge can turn preferences into a feasible trip, show what still needs checking, and separate planning from booking and payment."
               : "这是一个面向首次来成都的国际自由行游客的产品经理作品。从场景定义到双语原型，重点解决三件事：让建议能执行，让不确定的信息有出处，让规划、预订和付款的状态不混淆。"}
           </p>
+          <div className="mt-4"><PMViewSheet trigger={<Button size="sm">{lang === "en" ? "Open PM view: metrics & AI governance" : "打开 PM 视角：指标与 AI 治理"}</Button>} /></div>
           <Button asChild variant="outline" size="sm" className="mt-4">
             <a href={`https://github.com/aujingx/chengdulens/blob/main/docs/product-case-study-${lang === "en" ? "en" : "cn"}.md`} target="_blank" rel="noreferrer">
               {lang === "en" ? "Product case study on GitHub" : "在 GitHub 阅读完整产品案例"}

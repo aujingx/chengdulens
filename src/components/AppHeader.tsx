@@ -1,6 +1,7 @@
 import { Compass, Languages } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { Button } from "@/components/ui/button";
+import { PMViewSheet } from "@/components/PMViewSheet";
 
 export function AppHeader() {
   const lang = useApp((s) => s.lang);
@@ -16,6 +17,7 @@ export function AppHeader() {
         <nav className="flex items-center gap-1 sm:gap-3" aria-label={zh ? "导航" : "Navigation"}>
           <Button asChild size="sm" variant="ghost" className="hidden sm:inline-flex"><a href="#trip">{zh ? "我的行程" : "My trip"}</a></Button>
           <Button asChild size="sm" variant="ghost"><a href="#case-study">{zh ? "关于" : "About"}</a></Button>
+          <PMViewSheet />
           <span aria-hidden="true" className="h-4 w-px bg-border" />
           <Button size="sm" variant="ghost" aria-label={zh ? "Switch to English" : "切换为中文"} onClick={() => setLang(zh ? "en" : "zh")}><Languages className="size-4" /> {zh ? "EN" : "中文"}</Button>
         </nav>
