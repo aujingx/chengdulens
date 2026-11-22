@@ -7,6 +7,8 @@ import { PlaceImage } from "@/components/PlaceImage";
 import { useApp } from "@/lib/store";
 import { dict } from "@/data/i18n";
 import { cn } from "@/lib/utils";
+import { useTravelPlan } from "@/lib/travel-plan-store";
+import { routeStops, toggleStop } from "@/lib/travel-plan";
 
 type Props = { place: Place | null; onClose: () => void };
 
@@ -20,12 +22,13 @@ const NEARBY_ICON: Record<NearbyItem["kind"], typeof UtensilsCrossed> = {
 
 export function PlaceDetailSheet({ place, onClose }: Props) {
   const lang = useApp((s) => s.lang);
-  const saves = useApp((s) => s.saves);
-  const toggleSave = useApp((s) => s.toggleSave);
+  const { plan, setPlan } = useTravelPlan();
   const t = dict[lang];
 
   if (!place) return null;
-  const saved = saves.includes(place.id);
+  const saved = plan ? routeStops(plan).some((p) => p.id === place.id) : false;
+  const next = plan ? toggleStop(plan, place.id, saved) : null;
+  const blocked = !plan || (!saved && next === plan);
 
   return (
     <Sheet open={!!place} onOpenChange={(open) => !open && onClose()}>
@@ -203,23 +206,24 @@ export function PlaceDetailSheet({ place, onClose }: Props) {
           <div className="sticky bottom-0 -mx-6 -mb-6 border-t border-border bg-background/95 backdrop-blur p-4 flex items-center gap-3">
             <Button
               size="lg"
+              disabled={blocked}
               className={cn(
                 "flex-1",
                 saved
                   ? "bg-leaf text-leaf-foreground hover:bg-leaf/90"
                   : "bg-coral text-coral-foreground hover:bg-coral/90",
               )}
-              onClick={() => toggleSave(place.id)}
+              onClick={() => { if (next) setPlan(next); }}
             >
               {saved ? (
                 <>
                   <BookmarkCheck className="h-4 w-4 mr-2" />
-                  {t.detail.saved}
+                  {lang === "zh" ? "已加入今日 · 点击移除" : "Added to today · Remove"}
                 </>
               ) : (
                 <>
                   <Bookmark className="h-4 w-4 mr-2" />
-                  {t.detail.save}
+                  {lang === "zh" ? (plan ? blocked ? "当前路线无法加入" : "加入今日行程" : "扩展成两日行程后可加入") : (plan ? blocked ? "Doesn’t fit this route" : "Add to today" : "Expand to a full trip to add")}
                 </>
               )}
             </Button>

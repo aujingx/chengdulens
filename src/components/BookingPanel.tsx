@@ -12,10 +12,11 @@ export function BookingPanel({ destination }: { destination: Destination }) {
   const zh = lang === "zh";
   const title = destinations[destination][lang];
   return (
-    <section aria-label={zh ? `${title}预订` : `${title} bookings`} className="mt-3 space-y-3 rounded-lg border border-border bg-cream/30 p-3 sm:p-4">
+    <section aria-label={zh ? `${title}预订` : `${title} bookings`} className="mt-3 space-y-3">
       <div>
         <h3 className="font-display font-semibold">{destination === "chengdu" ? (zh ? `今天 · ${title}` : `Today · ${title}`) : (zh ? `明天及之后 · ${title}` : `Tomorrow and after · ${title}`)}</h3>
         <p className="text-xs text-muted-foreground">{zh ? "站内操作仅为演示，不会扣款或提交预约；外链可查询官方信息。" : "In-app actions are simulations; no charges or reservations. External links lead to official information."}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{zh ? "以下为独立的流程演示项目，不代表已选餐厅或酒店的真实报价。酒店选择请通过行程里的地图链接联系核实。" : "These are separate workflow examples, not quotes for your chosen restaurant or hotel. Use the map links in your plan to verify your hotel choice."}</p>
       </div>
       {bookingItems(destination).map((item) => (
         <BookingCard key={item.id} item={item} />

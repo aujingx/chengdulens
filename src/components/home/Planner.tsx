@@ -24,7 +24,6 @@ export function Planner({ lang, onOpenPlace }: { lang: Lang; onOpenPlace: (id: s
   const [text, setText] = useState(SAMPLE[lang]);
   const [error, setError] = useState(false);
   const [booking, setBooking] = useState<null | "chengdu" | "jiuzhaigou">(null);
-  useEffect(() => { void useTravelPlan.persist.rehydrate(); }, []);
   useEffect(() => { setText((t) => (t === SAMPLE.en || t === SAMPLE.zh ? SAMPLE[lang] : t)); }, [lang]);
 
   function start(mode: Plan["mode"]) {
@@ -36,14 +35,14 @@ export function Planner({ lang, onOpenPlace }: { lang: Lang; onOpenPlace: (id: s
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-border/60 bg-background p-4 shadow-sm sm:p-5">
+      <div className="border-b border-border/60 pb-6">
         <label htmlFor="brief" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{zh ? "用一句话告诉我你的安排" : "Tell me your trip in one sentence"}</label>
         <textarea id="brief" value={text} onChange={(e) => setText(e.target.value)} rows={3}
-          className="mt-2 w-full resize-none rounded-2xl border border-border bg-cream/30 p-3 text-sm leading-relaxed outline-none focus:border-coral" />
+          className="mt-2 w-full resize-none rounded-lg border border-border bg-cream/30 p-3 text-sm leading-relaxed outline-none focus:border-coral" />
         {error && <p className="mt-2 text-xs text-destructive">{zh ? "演示版目前支持“今天成都 + 明天九寨沟”的行程，请在句子里提到这两个地方。" : "This demo plans “Chengdu today + Jiuzhaigou tomorrow”. Please mention both."}</p>}
         <div className="mt-3 flex flex-wrap gap-2">
-          <Button type="button" className="rounded-full bg-coral text-coral-foreground hover:bg-coral/90" onClick={() => start("guided")}><Wand2 className="size-4" />{zh ? "全部听 AI 的，一键托管" : "Let AI plan it all"}</Button>
-          <Button type="button" variant="outline" className="rounded-full" onClick={() => start("manual")}>{zh ? "我来选，一步步安排" : "I’ll choose step by step"}<ArrowRight className="size-4" /></Button>
+          <Button type="button" className="rounded-lg bg-planner-green text-planner-on-green hover:bg-planner-green/90" onClick={() => start("guided")}><Wand2 className="size-4" />{zh ? "全部听 AI 的，一键托管" : "Let AI plan it all"}</Button>
+          <Button type="button" variant="outline" className="rounded-lg" onClick={() => start("manual")}>{zh ? "我来选，一步步安排" : "I’ll choose step by step"}<ArrowRight className="size-4" /></Button>
         </div>
       </div>
 
@@ -69,18 +68,18 @@ function Workbench({ lang, plan, setPlan, onOpenPlace, onBook }: { lang: Lang; p
   const name = (o?: Option) => (o ? (zh ? o.zh : o.en) : zh ? "未选" : "Not chosen");
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-border/60 bg-background shadow-sm">
+    <div className="overflow-hidden border-y border-border/60 bg-card">
       <div className="flex flex-wrap items-center gap-2 border-b border-border/60 bg-cream/50 px-4 py-3">
         {STEPS.map((s, i) => (
-          <button key={s} type="button" onClick={() => go(s)} aria-current={s === plan.step ? "step" : undefined}
-            className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium", s === plan.step ? "bg-foreground text-background" : i < idx ? "text-foreground" : "text-muted-foreground")}>
-            <span className={cn("grid size-4 place-items-center rounded-full text-[10px]", i < idx ? "bg-leaf text-background" : "border border-current")}>{i < idx ? <Check className="size-3" /> : i + 1}</span>
+          <Button variant="ghost" key={s} type="button" onClick={() => go(s)} aria-current={s === plan.step ? "step" : undefined}
+            className={cn("inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium", s === plan.step ? "bg-foreground text-background" : i < idx ? "text-foreground" : "text-muted-foreground")}>
+            <span className={cn("grid size-4 place-items-center rounded-lg text-[10px]", i < idx ? "bg-leaf text-background" : "border border-current")}>{i < idx ? <Check className="size-3" /> : i + 1}</span>
             {zh ? STEP_LABEL[s].zh : STEP_LABEL[s].en}
-          </button>
+          </Button>
         ))}
-        <div className="ml-auto flex rounded-full border border-border bg-background p-0.5 text-xs" role="group" aria-label={zh ? "天气" : "Weather"}>
-          <button type="button" aria-pressed={!plan.rain} onClick={() => setPlan(changeWeather(plan, false))} className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1", !plan.rain && "bg-sun/40")}><Sun className="size-3.5" />{zh ? "晴" : "Sunny"}</button>
-          <button type="button" aria-pressed={plan.rain} onClick={() => setPlan(changeWeather(plan, true))} className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1", plan.rain && "bg-accent")}><CloudRain className="size-3.5" />{zh ? "雨" : "Rain"}</button>
+        <div className="ml-auto flex rounded-lg border border-border bg-background p-0.5 text-xs" role="group" aria-label={zh ? "天气" : "Weather"}>
+          <Button variant="ghost" size="sm" type="button" aria-pressed={!plan.rain} onClick={() => setPlan(changeWeather(plan, false))} className={cn("inline-flex items-center gap-1 rounded-lg px-2.5 py-1", !plan.rain && "bg-sun/40")}><Sun className="size-3.5" />{zh ? "晴" : "Sunny"}</Button>
+          <Button variant="ghost" size="sm" type="button" aria-pressed={plan.rain} onClick={() => setPlan(changeWeather(plan, true))} className={cn("inline-flex items-center gap-1 rounded-lg px-2.5 py-1", plan.rain && "bg-accent")}><CloudRain className="size-3.5" />{zh ? "雨" : "Rain"}</Button>
         </div>
       </div>
 
@@ -94,18 +93,18 @@ function Workbench({ lang, plan, setPlan, onOpenPlace, onBook }: { lang: Lang; p
                 const next = toggleStop(plan, p.id, on);
                 const blocked = !on && next === plan;
                 return (
-                  <div key={p.id} className={cn("overflow-hidden rounded-2xl border bg-background", on ? "border-coral ring-1 ring-coral" : "border-border/60")}>
-                    <button type="button" onClick={() => onOpenPlace(p.id)} className="block w-full text-left">
+                  <div key={p.id} className={cn("overflow-hidden rounded-lg border bg-background", on ? "border-coral ring-1 ring-coral" : "border-border/60")}>
+                    <Button variant="ghost" type="button" onClick={() => onOpenPlace(p.id)} className="block h-auto w-full overflow-hidden p-0 text-left">
                       <PlaceImage src={p.image.url} alt={p.image.alt} className="aspect-[16/10] w-full" />
-                    </button>
+                    </Button>
                     <div className="p-3">
                       <p className="font-semibold">{zh ? p.zhName : p.name}</p>
                       <p className="text-xs text-muted-foreground">{zh ? p.categoryZh : p.category} · {p.duration} {zh ? "分钟" : "min"}{p.indoor ? (zh ? " · 室内" : " · indoor") : ""}</p>
                       <div className="mt-2 flex gap-2">
-                        <Button type="button" size="sm" variant={on ? "default" : "outline"} disabled={blocked} className="h-8 flex-1 rounded-full text-xs" onClick={() => setPlan(next)}>
+                        <Button type="button" size="sm" variant={on ? "default" : "outline"} disabled={blocked} className="h-8 flex-1 rounded-lg text-xs" onClick={() => setPlan(next)}>
                           {on ? <><Check className="size-3.5" />{zh ? "已加入" : "Added"}</> : blocked ? (zh ? "时间不够" : "Won’t fit") : <><Plus className="size-3.5" />{zh ? "加入今日" : "Add"}</>}
                         </Button>
-                        <Button type="button" size="sm" variant="ghost" className="h-8 rounded-full text-xs" onClick={() => onOpenPlace(p.id)}>{zh ? "周边" : "Nearby"}</Button>
+                        <Button type="button" size="sm" variant="ghost" className="h-8 rounded-lg text-xs" onClick={() => onOpenPlace(p.id)}>{zh ? "周边" : "Nearby"}</Button>
                       </div>
                     </div>
                   </div>
@@ -126,6 +125,10 @@ function Workbench({ lang, plan, setPlan, onOpenPlace, onBook }: { lang: Lang; p
         )}
         {plan.step === "tomorrow" && (
           <div className="space-y-6">
+            <div className="border-l-2 border-planner-green pl-4 text-sm leading-relaxed">
+              <h3 className="font-semibold">{zh ? "成都东 → 黄龙九寨站 → 九寨沟口" : "Chengdu East → Huanglong Jiuzhai Station → Park gate"}</h3>
+              <p className="mt-1 text-muted-foreground">{zh ? "明早乘高铁，再接驳到酒店；下午抵达、休息或在沟口散步。完整游览景区建议留到后一天，车次与门票以官方渠道为准。" : "Morning train, then transfer to your hotel. Settle in or walk near the gate in the afternoon. Allow the following day for the park; verify train times and tickets officially."}</p>
+            </div>
             <Choice lang={lang} title={zh ? "高铁到站后怎么去酒店" : "From the train to your hotel"} options={TRANSFERS} value={plan.transfer} onPick={(id) => set({ transfer: id })} />
             <Choice lang={lang} title={zh ? "九寨沟住宿" : "Jiuzhaigou stay"} options={JIUZHAI_HOTELS} value={plan.jiuzhaiHotel} onPick={(id) => set({ jiuzhaiHotel: id })} />
             <Choice lang={lang} title={zh ? "明天晚餐" : "Tomorrow’s dinner"} options={MEALS} value={plan.meal} onPick={(id) => set({ meal: id })} />
@@ -139,12 +142,13 @@ function Workbench({ lang, plan, setPlan, onOpenPlace, onBook }: { lang: Lang; p
               [zh ? "住宿" : "Hotel", name(optionById(CHENGDU_HOTELS, plan.chengduHotel))],
             ]} onBook={() => onBook("chengdu")} lang={lang} />
             <Day title={zh ? "明天 · 九寨沟" : "Tomorrow · Jiuzhaigou"} rows={[
+              [zh ? "路线" : "Route", zh ? "成都东 → 黄龙九寨站 → 沟口；抵达休息，后一天游景区" : "Chengdu East → Huanglong Jiuzhai → Gate; settle in, park the following day"],
               [zh ? "接驳" : "Transfer", name(optionById(TRANSFERS, plan.transfer))],
               [zh ? "住宿" : "Hotel", name(optionById(JIUZHAI_HOTELS, plan.jiuzhaiHotel))],
               [zh ? "晚餐" : "Dinner", name(optionById(MEALS, plan.meal))],
             ]} onBook={() => onBook("jiuzhaigou")} lang={lang} />
             <div className="flex flex-wrap items-center gap-2 md:col-span-2">
-              <Button type="button" className="rounded-full" disabled={plan.saved} onClick={() => setPlan({ ...plan, saved: true })}>
+              <Button type="button" className="rounded-lg" disabled={plan.saved} onClick={() => setPlan({ ...plan, saved: true })}>
                 <Bookmark className="size-4" />{plan.saved ? (zh ? "已保存到本机" : "Saved on this device") : (zh ? "保存行程" : "Save plan")}
               </Button>
               <span className="text-xs text-muted-foreground">{plan.mode === "guided" ? (zh ? "由 AI 托管填写，可点上方任一步修改。" : "Filled by AI; tap any step above to change it.") : (zh ? "你可以随时回到任一步修改。" : "Tap any step to revise.")}</span>
@@ -152,11 +156,11 @@ function Workbench({ lang, plan, setPlan, onOpenPlace, onBook }: { lang: Lang; p
           </div>
         )}
 
-        <div className="mt-6 flex items-center justify-between gap-2 border-t border-border/60 pt-4">
-          <Button type="button" variant="ghost" size="sm" disabled={idx === 0} onClick={() => go(STEPS[idx - 1]!)}><ArrowLeft className="size-4" />{zh ? "上一步" : "Back"}</Button>
-          <div className="flex gap-2">
-            {plan.step !== "summary" && <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={() => setPlan(fillPlan(plan))}><Sparkles className="size-4" />{zh ? "剩下的交给 AI" : "AI fills the rest"}</Button>}
-            {plan.step !== "summary" && <Button type="button" size="sm" className="rounded-full bg-coral text-coral-foreground hover:bg-coral/90" onClick={() => go(STEPS[idx + 1]!)}>{zh ? "下一步" : "Next"}<ArrowRight className="size-4" /></Button>}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-4">
+          <Button type="button" variant="ghost" size="sm" disabled={idx === 0} onClick={() => { const previous = STEPS[idx - 1]; if (previous) go(previous); }}><ArrowLeft className="size-4" />{zh ? "上一步" : "Back"}</Button>
+          <div className="flex flex-wrap gap-2">
+            {plan.step !== "summary" && <Button type="button" variant="outline" size="sm" className="rounded-lg" onClick={() => setPlan(fillPlan(plan))}><Sparkles className="size-4" />{zh ? "剩下的交给 AI" : "AI fills the rest"}</Button>}
+            {plan.step !== "summary" && <Button type="button" size="sm" className="rounded-lg bg-planner-green text-planner-on-green hover:bg-planner-green/90" onClick={() => { const next = STEPS[idx + 1]; if (next) go(next); }}>{zh ? "下一步" : "Next"}<ArrowRight className="size-4" /></Button>}
           </div>
         </div>
       </div>
@@ -171,7 +175,7 @@ function Hint({ children }: { children: React.ReactNode }) {
 function RouteStrip({ lang, names, total, budget }: { lang: Lang; names: string[]; total: number; budget: number }) {
   const zh = lang === "zh";
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-cream/60 px-4 py-3 text-sm">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg bg-cream/60 px-4 py-3 text-sm">
       <MapPin className="size-4 text-coral" />
       <span className="font-medium">{names.length ? names.join(" → ") : zh ? "还没有加入地点" : "No places yet"}</span>
       <span className="ml-auto text-xs text-muted-foreground">{total} / {budget} {zh ? "分钟（含路程，估算）" : "min incl. travel (est.)"}</span>
@@ -187,12 +191,12 @@ function Choice({ lang, title, hint, options, value, onPick }: { lang: Lang; tit
       {hint && <Hint>{hint}</Hint>}
       <div className="grid gap-3 md:grid-cols-3">
         {options.map((o) => (
-          <button key={o.id} type="button" onClick={() => onPick(o.id)} aria-pressed={value === o.id}
-            className={cn("rounded-2xl border p-4 text-left transition", value === o.id ? "border-coral bg-coral/5 ring-1 ring-coral" : "border-border/60 hover:border-coral/50")}>
-            <span className="flex items-start justify-between gap-2"><span className="font-semibold leading-snug">{zh ? o.zh : o.en}</span>{value === o.id && <Check className="size-4 shrink-0 text-coral" />}</span>
+          <div key={o.id}
+            className={cn("rounded-lg border p-4 text-left transition", value === o.id ? "border-coral bg-coral/5 ring-1 ring-coral" : "border-border/60 hover:border-coral/50")}>
+            <Button variant="ghost" type="button" onClick={() => onPick(o.id)} aria-pressed={value === o.id} className="h-auto w-full items-start justify-between whitespace-normal p-0 text-left hover:bg-transparent"><span className="font-semibold leading-snug">{zh ? o.zh : o.en}</span>{value === o.id && <Check className="size-4 shrink-0 text-coral" />}</Button>
             <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{zh ? o.note.zh : o.note.en}</span>
             {o.query && <a onClick={(e) => e.stopPropagation()} href={`https://uri.amap.com/search?keyword=${encodeURIComponent(o.query)}`} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-coral underline-offset-2 hover:underline">{zh ? "在地图上查看" : "View on map"}</a>}
-          </button>
+          </div>
         ))}
       </div>
     </div>
@@ -201,12 +205,12 @@ function Choice({ lang, title, hint, options, value, onPick }: { lang: Lang; tit
 
 function Day({ lang, title, rows, onBook }: { lang: Lang; title: string; rows: [string, string][]; onBook: () => void }) {
   return (
-    <div className="rounded-2xl border border-border/60 p-4">
+    <div className="rounded-lg border border-border/60 p-4">
       <h3 className="font-display text-lg font-semibold">{title}</h3>
       <dl className="mt-3 space-y-2 text-sm">
         {rows.map(([k, v]) => (<div key={k} className="grid grid-cols-[4.5rem_1fr] gap-2"><dt className="text-muted-foreground">{k}</dt><dd>{v}</dd></div>))}
       </dl>
-      <Button type="button" variant="outline" size="sm" className="mt-4 rounded-full" onClick={onBook}><Ticket className="size-4" />{lang === "zh" ? "查看预订与官方核对" : "Bookings & official checks"}</Button>
+      <Button type="button" variant="outline" size="sm" className="mt-4 rounded-lg" onClick={onBook}><Ticket className="size-4" />{lang === "zh" ? "查看预订与官方核对" : "Bookings & official checks"}</Button>
     </div>
   );
 }

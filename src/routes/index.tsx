@@ -1,644 +1,92 @@
-import { PMViewSheet } from "@/components/PMViewSheet";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import {
-  ArrowRight,
-  Sparkles,
-  MapPin,
-  Clock,
-  Footprints,
-  CloudRain,
-  RotateCcw,
-  Bookmark,
-  Trash2,
-  Compass,
-  Ticket,
-  Check,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, Compass, MapPin, Shuffle, Route as RouteIcon, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useApp } from "@/lib/store";
-import { dict } from "@/data/i18n";
-import { TasteProfileDialog } from "@/components/TasteProfileDialog";
+import { PMViewSheet } from "@/components/PMViewSheet";
 import { PlaceImage } from "@/components/PlaceImage";
-import { PlaceCard } from "@/components/PlaceCard";
 import { PlaceDetailSheet } from "@/components/PlaceDetailSheet";
-import { AskAI } from "@/components/AskAI";
-import { AnchorNav, type Section } from "@/components/AnchorNav";
-import { places, findPlace, type Place } from "@/data/places";
+import { Planner } from "@/components/home/Planner";
+import { WanderMode } from "@/components/home/WanderMode";
+import { useApp } from "@/lib/store";
+import { useTravelPlan } from "@/lib/travel-plan-store";
+import { newPlan, readBrief, SAMPLE } from "@/lib/travel-plan";
+import { findPlace } from "@/data/places";
+import jinliPhoto from "@/assets/jinli.asset.json";
 import { cn } from "@/lib/utils";
-import { computeRoute, proposeRainSwaps, applySwaps, type RainProposal } from "@/lib/tripMath";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Chengdu Lens — Your AI travel companion for Chengdu" },
-      {
-        name: "description",
-        content:
-          "Plan a Chengdu afternoon and continue into Sichuan with a bilingual travel concierge, curated places and a clearly labeled booking simulation.",
-      },
-      { property: "og:title", content: "Chengdu Lens" },
-      { property: "og:description", content: "From an afternoon in Chengdu to a side trip in Sichuan: try the guided journey." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: places[0].image.url },
-      { name: "twitter:image", content: places[0].image.url },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Chengdu Lens — City walks & two-day travel plans" },
+    { name: "description", content: "Discover a spontaneous Chengdu walk or plan an afternoon, dinner, hotels and tomorrow’s Jiuzhaigou journey in one bilingual travel demo." },
+    { property: "og:title", content: "Chengdu Lens — Walk today, plan tomorrow" },
+    { property: "og:description", content: "Curated city walks and a shared two-day itinerary with rain alternatives and clearly labeled booking simulations." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: Home,
 });
 
-const SECTIONS: Section[] = [
-  { id: "top", en: "Story", zh: "故事" },
-  { id: "ask-ai", en: "Concierge", zh: "向导" },
-  { id: "taste", en: "Your Taste", zh: "你的偏好" },
-  { id: "discover", en: "Discover", zh: "发现" },
-  { id: "trip", en: "Your Trip", zh: "行程" },
-];
-
-
 function Home() {
   const lang = useApp((s) => s.lang);
-  const profile = useApp((s) => s.profile);
-  const applyDemoProfile = useApp((s) => s.useDemoProfile);
-  const saves = useApp((s) => s.saves);
-  const rainActive = useApp((s) => s.rainActive);
-  const setRain = useApp((s) => s.setRain);
-  const t = dict[lang];
-  const [profileOpen, setProfileOpen] = useState(false);
+  const zh = lang === "zh";
+  const { entryMode, setEntryMode, setPlan } = useTravelPlan();
   const [openId, setOpenId] = useState<string | null>(null);
-
+  useEffect(() => { void useTravelPlan.persist.rehydrate(); }, []);
   const openPlace = openId ? findPlace(openId) ?? null : null;
-  const savedPlaces = saves.map(findPlace).filter(Boolean) as Place[];
-  const featured = places[0];
-  const rest = places.slice(1);
+  const scrollToTrip = () => document.getElementById("trip")?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <div>
-      <AnchorNav sections={SECTIONS} />
+    <div className="bg-planner-wash">
+      <section id="top" className="relative isolate overflow-hidden">
+        <PlaceImage src={jinliPhoto.url} alt={zh ? "成都锦里入口与红灯笼" : "The entrance to Jinli Ancient Street in Chengdu"} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-planner-scrim/50" />
+        <div className="relative mx-auto flex min-h-[330px] max-w-6xl flex-col justify-center px-5 py-10 text-planner-photo-text sm:min-h-[360px] sm:px-8">
+          <p className="mb-3 flex items-center gap-2 text-sm font-medium"><MapPin className="size-4" />{zh ? "中国 · 成都" : "CHENGDU, CHINA"}</p>
+          <h1 className="font-display text-4xl font-semibold sm:text-6xl">{zh ? "成都漫游" : "Chengdu Lens"}</h1>
+          <p className="mt-4 max-w-lg text-base leading-relaxed sm:text-lg">{zh ? "想随意走走，还是把今天和明天都安排好？" : "A little wandering, or a plan for today and tomorrow?"}</p>
+          <Button variant="outline" className="mt-6 w-fit border-planner-photo-text/50 bg-transparent text-planner-photo-text hover:bg-planner-photo-text hover:text-planner-scrim" onClick={scrollToTrip}>{zh ? "从这里出发" : "Let’s go"}<ArrowRight className="size-4" /></Button>
+          <span className="absolute bottom-4 right-5 text-xs text-planner-photo-text/80 sm:right-8">{zh ? "锦里古街" : "Jinli Ancient Street"}</span>
+        </div>
+      </section>
 
-      {/* HERO */}
-      <section id="top" className="relative overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-14 pb-20 lg:pl-32">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="h-px w-10 bg-coral" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-coral">
-              {lang === "en" ? "01 · A city guide, remixed" : "01 · 重新设计的城市指南"}
-            </span>
-          </div>
-          <div className="grid lg:grid-cols-[1.3fr_1fr] gap-10 items-end">
-            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[0.98] tracking-tight">
-              {lang === "en" ? (
-                <>
-                  See Chengdu the way you'd <span className="italic font-light text-coral">actually</span> live it.
-                </>
-              ) : (
-                <>
-                  以你真实的生活方式，<span className="italic font-light text-coral">看见</span>成都。
-                </>
-              )}
-            </h1>
-            <p className="text-base text-muted-foreground leading-relaxed lg:pl-8 lg:border-l lg:border-border pb-3">
-              {lang === "en"
-                ? "An AI concierge demo that turns your taste into a walkable afternoon — 8 curated places with source-linked ticket info, metro notes, nearby recommendations, and an assistant focused on these places."
-                : "一个城市 AI 向导 Demo，把你的偏好翻译成一段可以走完的下午 —— 8 个精选地点，含来源链接的票务信息、地铁提示、周边推荐，以及聚焦这些地点的 AI 助手。"}
-            </p>
-          </div>
-
-          <div className="mt-10 flex flex-wrap items-center gap-3">
-            <Button asChild size="lg" className="rounded-full bg-coral text-coral-foreground hover:bg-coral/90 shadow-lg shadow-coral/20">
-              <a href="#ask-ai"><Sparkles className="size-4" />{lang === "en" ? "Try the guided trip" : "体验今天到明天的行程"}<ArrowRight className="size-4" /></a>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="rounded-full">
-              <a href="#discover">{lang === "en" ? "Explore Chengdu" : "先逛成都景点"}</a>
-            </Button>
-          </div>
-
-          {/* Featured hero card */}
-          <div className="mt-16 grid md:grid-cols-[2fr_1fr] gap-6">
-            <button
-              onClick={() => setOpenId(featured.id)}
-              className="group relative overflow-hidden rounded-3xl aspect-[16/10] text-left"
-            >
-              <PlaceImage src={featured.image.url} alt={featured.image.alt} className="h-full w-full transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <p className="text-[10px] uppercase tracking-[0.25em] font-semibold opacity-80 mb-1">
-                  {lang === "en" ? "Featured" : "本期推荐"}
-                </p>
-                <h3 className="font-display text-3xl font-semibold">{featured.name}</h3>
-                <p className="mt-1 text-sm opacity-90 max-w-md">
-                  {lang === "en" ? featured.whyFits : featured.whyFitsZh}
-                </p>
-              </div>
-            </button>
-            <div className="rounded-3xl bg-cream border border-border/60 p-6 flex flex-col justify-between">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.25em] font-semibold text-muted-foreground mb-3">
-                  {lang === "en" ? "In this issue" : "本期内容"}
-                </p>
-                <ul className="space-y-2.5 text-sm">
-                  <IssueRow n="01" label={lang === "en" ? "Your taste" : "你的偏好"} note={lang === "en" ? "One-tap demo profile" : "一键 Demo 偏好"} />
-                  <IssueRow n="02" label={lang === "en" ? "8 curated places" : "8 个精选地点"} note={lang === "en" ? "Tickets, metro, nearby" : "门票、地铁、周边"} />
-                  <IssueRow n="03" label={lang === "en" ? "A walkable trip" : "可走通的行程"} note={lang === "en" ? "With rain plan B" : "含雨天备份"} />
-                  <IssueRow n="04" label={lang === "en" ? "AI concierge demo" : "AI 向导 Demo"} note={lang === "en" ? "Ask about these places" : "围绕这 8 个地点提问"} />
-                </ul>
-              </div>
-              <p className="mt-6 text-[11px] text-muted-foreground leading-relaxed">
-                {lang === "en"
-                  ? "Demo scenario. Not based on completed user interviews."
-                  : "Demo 场景。未基于完整用户访谈。"}
-              </p>
+      <section id="trip" className="scroll-mt-20">
+        <div className="mx-auto max-w-6xl px-4 py-7 sm:px-8 sm:py-10">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex max-w-full rounded-lg border border-border bg-card p-1" role="tablist" aria-label={zh ? "旅行方式" : "Travel mode"}>
+              <Button id="wander-tab" role="tab" aria-selected={entryMode === "wander"} aria-controls="travel-panel" variant="ghost" className={cn("px-3 sm:px-5", entryMode === "wander" && "bg-planner-green text-planner-on-green hover:bg-planner-green hover:text-planner-on-green")} onClick={() => setEntryMode("wander")}><Shuffle className="size-4" />{zh ? "随性漫游" : "Just wander"}</Button>
+              <Button id="plan-tab" role="tab" aria-selected={entryMode === "plan"} aria-controls="travel-panel" variant="ghost" className={cn("px-3 sm:px-5", entryMode === "plan" && "bg-planner-green text-planner-on-green hover:bg-planner-green hover:text-planner-on-green")} onClick={() => setEntryMode("plan")}><RouteIcon className="size-4" />{zh ? "安排两日行程" : "Plan two days"}</Button>
             </div>
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Compass className="size-3.5" />{zh ? "成都 → 九寨沟" : "Chengdu → Jiuzhaigou"}</span>
+          </div>
+          <div id="travel-panel" role="tabpanel" aria-labelledby={entryMode === "wander" ? "wander-tab" : "plan-tab"}>
+            <h2 className="mb-5 font-display text-2xl font-semibold">{entryMode === "wander" ? (zh ? "今天，想怎么逛？" : "What are you in the mood for?") : (zh ? "把今天和明天，串成一次旅行。" : "Today and tomorrow, one journey.")}</h2>
+            {entryMode === "wander" ? <WanderMode lang={lang} onOpenPlace={setOpenId} onExpand={(stops, rain) => {
+              const brief = readBrief(SAMPLE[lang]);
+              if (!brief) return;
+              const next = newPlan(brief, "manual");
+              setPlan({ ...next, rain, ...(rain ? { rainyStops: stops.map((p) => p.id) } : { sunnyStops: stops.map((p) => p.id) }) });
+              setEntryMode("plan");
+              scrollToTrip();
+            }} /> : <Planner lang={lang} onOpenPlace={setOpenId} />}
           </div>
         </div>
       </section>
 
-      {/* ASK AI */}
-      <section id="ask-ai" className="scroll-mt-16 border-t border-border/40">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-10 sm:py-14 lg:pl-32">
-          <SectionHeader
-            no="02"
-            title={lang === "en" ? "Plan with the concierge" : "跟向导一起安排行程"}
-            subtitle={
-              lang === "en"
-                ? "One conversation for your Chengdu afternoon and tomorrow’s trip."
-                : "从今天下午的成都开始，在同一段对话里接着安排明天。"
-            }
-          />
-          <div className="mt-5">
-            <AskAI />
+      <section id="case-study" className="scroll-mt-20 border-t border-border bg-card">
+        <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
+          <p className="mb-2 text-xs font-semibold text-planner-orange">{zh ? "产品背后的思考" : "BEHIND THE PRODUCT"}</p>
+          <h2 className="font-display text-2xl font-semibold">{zh ? "关于成都漫游" : "About Chengdu Lens"}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{zh ? "一个面向国际自由行游客的产品经理作品：在随性探索与确定性规划之间，让旅行建议走向可执行的安排。精选内容、晴雨备选与双语体验，服务同一段旅程。" : "A product management portfolio for international travelers: connecting spontaneous discovery with practical planning through curated places, rain alternatives and a bilingual journey."}</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <PMViewSheet trigger={<Button variant="outline" size="sm">{zh ? "PM 视角 · 指标与 AI 治理" : "PM view · Metrics & AI governance"}</Button>} />
+            <Button asChild variant="ghost" size="sm"><a href={`https://github.com/aujingx/chengdulens/blob/main/docs/product-case-study-${zh ? "cn" : "en"}.md`} target="_blank" rel="noreferrer">{zh ? "完整产品案例" : "Full product case study"}<ExternalLink className="size-3.5" /></a></Button>
           </div>
         </div>
       </section>
-
-      {/* TASTE */}
-      <section id="taste" className="border-t border-border/40 bg-cream/50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 lg:pl-32">
-          <SectionHeader
-            no="03"
-            title={lang === "en" ? "Your Taste" : "你的偏好"}
-            subtitle={
-              lang === "en"
-                ? "One demo persona: quiet neighborhoods, no spicy food, four hours from Taikoo Li. Edit anytime."
-                : "一个 Demo 画像：安静街区、不吃辣、太古里出发 4 小时。随时可改。"
-            }
-          />
-          <div className="grid md:grid-cols-[1fr_1.2fr] gap-8 mt-10">
-            <div className="rounded-3xl bg-background border border-border/60 p-6">
-              {profile ? (
-                <div className="space-y-4">
-                  <TasteRow icon="⏱" label={lang === "en" ? "Time" : "时间"} value={`${profile.hours}h`} />
-                  <TasteRow icon="📍" label={lang === "en" ? "Starting" : "出发点"} value={profile.start} />
-                  <TasteRow icon="🍜" label={lang === "en" ? "Diet" : "饮食"} value={profile.diet} />
-                  <TasteRow icon="🚶" label={lang === "en" ? "Walking" : "步行"} value={profile.walking} />
-                  <TasteRow icon="🌦" label={lang === "en" ? "Weather" : "天气"} value={profile.weather} />
-                  <div className="flex flex-wrap gap-1.5 pt-2">
-                    {profile.taste.map((x) => (
-                      <span key={x} className="rounded-full bg-cream px-3 py-1 text-xs font-medium capitalize">
-                        {x}
-                      </span>
-                    ))}
-                  </div>
-                  <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => setProfileOpen(true)}>
-                    {lang === "en" ? "Edit profile" : "修改偏好"}
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <span className="inline-grid h-14 w-14 place-items-center rounded-full bg-coral/10 text-coral mb-4">
-                    <Sparkles className="h-6 w-6" />
-                  </span>
-                  <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                    {lang === "en"
-                      ? "Load the demo taste to see everything come alive."
-                      : "载入 Demo 偏好，下面的内容会立即适配。"}
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <Button className="bg-coral text-coral-foreground hover:bg-coral/90" onClick={applyDemoProfile}>
-                      {lang === "en" ? "Use demo taste" : "使用 Demo 偏好"}
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setProfileOpen(true)}>
-                      {lang === "en" ? "Or build your own" : "或自己填"}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="space-y-4">
-              <PrincipleCard
-                icon="✍️"
-                title={lang === "en" ? "Taste, not vibes" : "偏好，不是氛围"}
-                body={
-                  lang === "en"
-                    ? "Time, diet, walking, weather work as hard gates — not decoration."
-                    : "时间、饮食、步行、天气是硬约束，不是装饰。"
-                }
-              />
-              <PrincipleCard
-                icon="🔍"
-                title={lang === "en" ? "Fit and evidence, separated" : "匹配度与证据分开"}
-                body={
-                  lang === "en"
-                    ? "How well a place suits you, and how solid the source is — never merged."
-                    : "一个地点适合你的程度，与来源可信度，永远分开呈现。"
-                }
-              />
-              <PrincipleCard
-                icon="🌂"
-                title={lang === "en" ? "Rain-ready" : "雨天备份"}
-                body={
-                  lang === "en"
-                    ? "Every outdoor stop has an indoor swap ready in one click."
-                    : "每个户外站点都准备好了一键切换的室内备份。"
-                }
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* DISCOVER */}
-      <section id="discover" className="scroll-mt-16 border-t border-border/40">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 lg:pl-32">
-          <SectionHeader
-            no="04"
-            title={lang === "en" ? "8 places worth your afternoon" : "值得留在下午的 8 个地点"}
-            subtitle={
-              lang === "en"
-                ? "Tap any card for tickets, metro directions, nearby food, and the AI's honest take."
-                : "点击卡片查看门票、地铁、周边好吃好玩，以及 AI 的诚实点评。"
-            }
-          />
-          <div className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-            {rest.map((p) => (
-              <PlaceCard key={p.id} place={p} onOpen={() => setOpenId(p.id)} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TRIP */}
-      <section id="trip" className="border-t border-border/40 bg-cream/40">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-20 lg:pl-32">
-          <SectionHeader
-            no="05"
-            title={lang === "en" ? "Your walkable afternoon" : "你可以走完的下午"}
-            subtitle={
-              lang === "en"
-                ? "Save 3 or more places and the trip stitches itself together — with a rain button ready."
-                : "收藏 3 个以上，行程会自动串起来 —— 雨天按钮已准备好。"
-            }
-          />
-          <div className="mt-10">
-            <TripSection savedPlaces={savedPlaces} rainActive={rainActive} onToggleRain={() => setRain(!rainActive)} />
-          </div>
-        </div>
-      </section>
-
-      <section id="case-study" className="scroll-mt-16 border-t border-border/60 bg-cream/40">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:pl-32">
-          <h2 className="font-display text-2xl font-semibold">{lang === "en" ? "About Chengdu Lens" : "关于成都漫游"}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            {lang === "en"
-              ? "A product management portfolio project for first-time international visitors. It explores how a travel concierge can turn preferences into a feasible trip, show what still needs checking, and separate planning from booking and payment."
-              : "这是一个面向首次来成都的国际自由行游客的产品经理作品。从场景定义到双语原型，重点解决三件事：让建议能执行，让不确定的信息有出处，让规划、预订和付款的状态不混淆。"}
-          </p>
-          <div className="mt-4"><PMViewSheet trigger={<Button size="sm">{lang === "en" ? "Open PM view: metrics & AI governance" : "打开 PM 视角：指标与 AI 治理"}</Button>} /></div>
-          <Button asChild variant="outline" size="sm" className="mt-4">
-            <a href={`https://github.com/aujingx/chengdulens/blob/main/docs/product-case-study-${lang === "en" ? "en" : "cn"}.md`} target="_blank" rel="noreferrer">
-              {lang === "en" ? "Product case study on GitHub" : "在 GitHub 阅读完整产品案例"}
-            </a>
-          </Button>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="border-t border-border/40 bg-cream">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 lg:pl-32">
-          <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
-            <p>© Chengdu Lens · Demo project</p>
-            <p>
-              {lang === "en" ? "Built with Lovable AI · Not affiliated with the city of Chengdu" : "由 Lovable AI 驱动 · 与成都市无关"}
-            </p>
-          </div>
-        </div>
+      <footer className="border-t border-border bg-card">
+        <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-5 py-5 text-xs text-muted-foreground sm:px-8"><span>© Chengdu Lens</span><span>{zh ? "作品集演示 · 无实际预订或扣款" : "Portfolio demo · No real bookings or charges"}</span></div>
       </footer>
-
       <PlaceDetailSheet place={openPlace} onClose={() => setOpenId(null)} />
-      <TasteProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />
-    </div>
-  );
-}
-
-function SectionHeader({ no, title, subtitle }: { no: string; title: string; subtitle: string }) {
-  return (
-    <div className="max-w-3xl">
-      <div className="flex items-center gap-3 mb-5">
-        <span className="h-px w-8 bg-coral" />
-        <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-coral">{no}</span>
-      </div>
-      <h2 className="font-display text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
-        {title}
-      </h2>
-      <p className="mt-4 text-base text-muted-foreground leading-relaxed max-w-2xl">{subtitle}</p>
-    </div>
-  );
-}
-
-function IssueRow({ n, label, note }: { n: string; label: string; note: string }) {
-  return (
-    <li className="flex items-baseline gap-3 border-b border-border/50 pb-2 last:border-0 last:pb-0">
-      <span className="font-display text-xs font-semibold text-coral tabular-nums">{n}</span>
-      <span className="flex-1 font-medium">{label}</span>
-      <span className="text-xs text-muted-foreground text-right">{note}</span>
-    </li>
-  );
-}
-
-function TasteRow({ icon, label, value }: { icon: string; label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between border-b border-border/40 pb-3 last:border-0">
-      <span className="text-sm text-muted-foreground flex items-center gap-2">
-        <span>{icon}</span>
-        {label}
-      </span>
-      <span className="text-sm font-semibold capitalize">{value}</span>
-    </div>
-  );
-}
-
-function PrincipleCard({ icon, title, body }: { icon: string; title: string; body: string }) {
-  return (
-    <div className="rounded-2xl bg-background border border-border/60 p-5 flex gap-4">
-      <span className="text-2xl">{icon}</span>
-      <div>
-        <p className="font-display font-semibold">{title}</p>
-        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{body}</p>
-      </div>
-    </div>
-  );
-}
-
-function TripSection({
-  savedPlaces,
-  rainActive,
-  onToggleRain,
-}: {
-  savedPlaces: Place[];
-  rainActive: boolean;
-  onToggleRain: () => void;
-}) {
-  const lang = useApp((s) => s.lang);
-  const removeSave = useApp((s) => s.removeSave);
-  const confirmedIds = useApp((s) => s.confirmedIds);
-  const toggleConfirm = useApp((s) => s.toggleConfirm);
-  const rainSwaps = useApp((s) => s.rainSwaps);
-  const applyRainSwaps = useApp((s) => s.applyRainSwaps);
-  const planStatus = useApp((s) => s.planStatus);
-  const setPlanStatus = useApp((s) => s.setPlanStatus);
-  const [proposal, setProposal] = useState<RainProposal | null>(null);
-
-  const stops = useMemo(
-    () => (rainActive ? applySwaps(savedPlaces, rainSwaps, findPlace) : savedPlaces),
-    [savedPlaces, rainActive, rainSwaps],
-  );
-  const route = useMemo(() => computeRoute(stops), [stops]);
-
-  if (savedPlaces.length === 0) {
-    return (
-      <div className="rounded-3xl border-2 border-dashed border-border p-12 text-center bg-background">
-        <span className="inline-grid h-14 w-14 place-items-center rounded-full bg-cream text-coral mb-4">
-          <Bookmark className="h-6 w-6" />
-        </span>
-        <p className="font-display text-xl font-semibold mb-2">
-          {lang === "en" ? "No places saved yet" : "还没有收藏地点"}
-        </p>
-        <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-          {lang === "en"
-            ? "Tap the bookmark on any Discover card. Save at least 3 to auto-build a walkable afternoon."
-            : "点击任一发现卡片上的书签图标。收藏至少 3 个即可自动生成可走通的下午。"}
-        </p>
-        <Button
-          onClick={() => document.getElementById("discover")?.scrollIntoView({ behavior: "smooth" })}
-          className="bg-coral text-coral-foreground hover:bg-coral/90 rounded-full"
-        >
-          <Compass className="h-4 w-4 mr-1.5" />
-          {lang === "en" ? "Explore places" : "去看看地点"}
-        </Button>
-      </div>
-    );
-  }
-
-  if (savedPlaces.length < 3) {
-    return (
-      <div className="rounded-3xl bg-background border border-border/60 p-8">
-        <p className="text-sm text-muted-foreground mb-4">
-          {lang === "en"
-            ? `You've saved ${savedPlaces.length}. Save ${3 - savedPlaces.length} more to build your route.`
-            : `已收藏 ${savedPlaces.length} 个，再收藏 ${3 - savedPlaces.length} 个就能生成路线。`}
-        </p>
-        <div className="grid sm:grid-cols-3 gap-4">
-          {savedPlaces.map((p) => (
-            <SavedMini key={p.id} place={p} onRemove={() => removeSave(p.id)} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  const en = lang === "en";
-  const nameOf = (id: string) => {
-    const p = findPlace(id);
-    return p ? (en ? p.name : p.zhName) : id;
-  };
-
-  return (
-    <div className="rounded-3xl bg-background border border-border/60 overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 p-5">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-          <span className="inline-flex items-center gap-1.5 font-semibold">
-            <Clock className="h-4 w-4 text-coral" />≈{Math.round((route.totalMin / 60) * 10) / 10}h{" "}
-            {en ? "estimated" : "预估"}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {en
-              ? `${route.stayMin} min at stops + ${route.travelMin} min moving + ${route.bufferMin} min buffer`
-              : `停留 ${route.stayMin} 分钟 + 移动 ${route.travelMin} 分钟 + 缓冲 ${route.bufferMin} 分钟`}
-          </span>
-        </div>
-        <div className="flex gap-2">
-          {rainActive ? (
-            <Button size="sm" variant="outline" className="rounded-full" onClick={onToggleRain}>
-              <RotateCcw className="h-4 w-4 mr-1.5" />
-              {en ? "Back to original" : "回到原方案"}
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              className="rounded-full"
-              onClick={() => setProposal(proposeRainSwaps(savedPlaces, places, confirmedIds))}
-            >
-              <CloudRain className="h-4 w-4 mr-1.5" />
-              {en ? "Rain just started" : "开始下雨了"}
-            </Button>
-          )}
-          <Button
-            size="sm"
-            className={cn("rounded-full", planStatus === "confirmed" ? "bg-leaf text-leaf-foreground hover:bg-leaf/90" : "bg-coral text-coral-foreground hover:bg-coral/90")}
-            onClick={() => setPlanStatus(planStatus === "confirmed" ? "draft" : "confirmed")}
-          >
-            <Check className="h-4 w-4 mr-1.5" />
-            {planStatus === "confirmed" ? (en ? "Plan confirmed" : "行程已确认") : en ? "Confirm this plan" : "确认这个行程"}
-          </Button>
-        </div>
-      </div>
-
-      {proposal && (
-        <div className="m-5 rounded-2xl border border-sky/40 bg-sky/10 p-5 text-sm">
-          <p className="font-display font-semibold mb-2">
-            {en ? "Rain plan — suggested changes" : "雨天方案 —— 建议调整"}
-          </p>
-          {proposal.swaps.length === 0 ? (
-            <p className="text-muted-foreground">
-              {en ? "No unused indoor place left to swap in. Keep the plan and bring an umbrella." : "没有可替换的室内地点，建议保持原计划并带伞。"}
-            </p>
-          ) : (
-            <ul className="space-y-1">
-              {proposal.swaps.map((sw) => (
-                <li key={sw.originalId}>
-                  {nameOf(sw.originalId)} → <strong>{nameOf(sw.replacementId)}</strong>{" "}
-                  <span className="text-muted-foreground">({en ? "indoor" : "室内"})</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {proposal.keptOutdoor.length > 0 && (
-            <p className="mt-2 text-muted-foreground">
-              {en ? "Stays outdoors (no unused indoor option): " : "保留户外（无可用室内替代）："}
-              {proposal.keptOutdoor.map(nameOf).join(", ")}
-            </p>
-          )}
-          {proposal.protectedIds.length > 0 && (
-            <p className="mt-1 text-muted-foreground">
-              {en ? "Not touched because you confirmed them: " : "已确认，不会改动："}
-              {proposal.protectedIds.map(nameOf).join(", ")}
-            </p>
-          )}
-          <div className="mt-4 flex gap-2">
-            <Button
-              size="sm"
-              className="rounded-full bg-sky text-sky-foreground hover:bg-sky/90"
-              disabled={proposal.swaps.length === 0}
-              onClick={() => {
-                applyRainSwaps(proposal.swaps);
-                setProposal(null);
-              }}
-            >
-              {en ? "Apply these changes" : "应用这些调整"}
-            </Button>
-            <Button size="sm" variant="ghost" className="rounded-full" onClick={() => setProposal(null)}>
-              {en ? "Keep my plan" : "保持原计划"}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      <ol className="p-6 space-y-4">
-        {stops.map((p, i) => {
-          const original = savedPlaces[i];
-          const swapped = rainActive && original && original.id !== p.id;
-          const leg = route.legs[i];
-          const confirmed = confirmedIds.includes(p.id);
-          return (
-            <li key={`${p.id}-${i}`} className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <span className="grid h-9 w-9 place-items-center rounded-full bg-foreground text-background font-display font-semibold text-sm">
-                  {i + 1}
-                </span>
-                {i < stops.length - 1 && <span className="w-px flex-1 bg-border my-2" />}
-              </div>
-              <div className="flex-1 pb-4">
-                {leg && (
-                  <p className="text-[11px] text-muted-foreground mb-1">
-                    ~{leg.minutes} min {leg.mode === "walk" ? (en ? "walk" : "步行") : en ? "metro/taxi" : "地铁/打车"}{" "}
-                    {en ? "from" : "自"} {i === 0 ? "Taikoo Li" : stops[i - 1].name} · {en ? "estimate" : "估算"}
-                  </p>
-                )}
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-display text-lg font-semibold">
-                      {p.name}
-                      <span className="ml-2 text-sm font-normal text-muted-foreground">{p.zhName}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5 flex flex-wrap items-center gap-3">
-                      <span className="inline-flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> {p.duration} min
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {p.area}
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <Ticket className="h-3 w-3" /> {en ? p.ticket.price : p.ticket.priceZh}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    {swapped && (
-                      <span className="text-[10px] uppercase tracking-widest bg-sky/15 text-sky px-2 py-0.5 rounded-full font-semibold">
-                        {en ? "Rain swap" : "雨天替换"}
-                      </span>
-                    )}
-                    {!swapped && (
-                      <button
-                        onClick={() => toggleConfirm(p.id)}
-                        className={cn(
-                          "text-[11px] rounded-full px-2.5 py-0.5 border",
-                          confirmed ? "bg-leaf/15 border-leaf/40 text-leaf font-semibold" : "border-border text-muted-foreground hover:border-leaf",
-                        )}
-                      >
-                        {confirmed ? (en ? "✓ Must keep" : "✓ 必去") : en ? "Mark must-keep" : "标为必去"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <p className="mt-2 text-sm text-coral font-medium leading-snug">{en ? p.whyFits : p.whyFitsZh}</p>
-                {swapped && original && (
-                  <p className="mt-2 text-xs text-muted-foreground italic">
-                    {en ? `Replaces ${original.name} after you approved the rain plan.` : `你确认雨天方案后替换了 ${original.zhName}。`}
-                  </p>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-      <p className="border-t border-border/60 px-6 py-3 text-[11px] text-muted-foreground">
-        {en
-          ? "Times are estimates from approximate distances — no live route data. Saved ≠ confirmed: mark must-keep stops so the rain plan won't touch them."
-          : "时间为按大致距离估算，无实时路线数据。收藏≠确认：标为必去的地点不会被雨天方案改动。"}
-      </p>
-    </div>
-  );
-}
-
-function SavedMini({ place, onRemove }: { place: Place; onRemove: () => void }) {
-  const lang = useApp((s) => s.lang);
-  return (
-    <div className="rounded-2xl border border-border/60 overflow-hidden bg-cream/40">
-      <PlaceImage src={place.image.url} alt={place.image.alt} className="aspect-[4/3] w-full" />
-      <div className="p-3">
-        <p className="font-display text-sm font-semibold truncate">{place.name}</p>
-        <p className="text-[10px] text-muted-foreground truncate">{place.area}</p>
-        <button
-          onClick={onRemove}
-          className="mt-2 inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-destructive"
-        >
-          <Trash2 className="h-3 w-3" />
-          {lang === "en" ? "Remove" : "移除"}
-        </button>
-      </div>
     </div>
   );
 }
