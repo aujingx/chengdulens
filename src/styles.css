@@ -67,9 +67,9 @@
   --radius: 0.9rem;
 
   /* Bright, joyful travel palette */
-  --cream: oklch(0.976 0.014 85);        /* #FBF7F0 base */
+  --cream: oklch(0.975 0.008 80);        /* #FBF7F0 base */
   --surface: oklch(0.995 0.006 85);      /* card surface, near white */
-  --ink: oklch(0.24 0.02 160);           /* deep ink */
+  --ink: oklch(0.22 0.015 165);           /* deep ink */
 
   --background: var(--cream);
   --foreground: var(--ink);
@@ -78,32 +78,32 @@
   --popover: var(--surface);
   --popover-foreground: var(--ink);
 
-  --primary: oklch(0.72 0.19 40);        /* coral #FF7A4D */
+  --primary: oklch(0.38 0.06 165);        /* coral #FF7A4D */
   --primary-foreground: oklch(0.99 0.005 85);
 
-  --secondary: oklch(0.94 0.02 85);
+  --secondary: oklch(0.94 0.012 80);
   --secondary-foreground: var(--ink);
 
-  --muted: oklch(0.94 0.014 85);
-  --muted-foreground: oklch(0.5 0.02 150);
+  --muted: oklch(0.945 0.009 80);
+  --muted-foreground: oklch(0.48 0.015 160);
 
-  --accent: oklch(0.94 0.03 145);
+  --accent: oklch(0.93 0.025 165);
   --accent-foreground: var(--ink);
 
   --destructive: oklch(0.62 0.22 27);
   --destructive-foreground: oklch(0.99 0.005 85);
 
-  --border: oklch(0.9 0.015 90);
-  --input: oklch(0.9 0.015 90);
-  --ring: oklch(0.72 0.19 40);
+  --border: oklch(0.9 0.01 80);
+  --input: oklch(0.9 0.01 80);
+  --ring: oklch(0.38 0.06 165);
 
-  --coral: oklch(0.72 0.19 40);          /* #FF7A4D */
+  --coral: oklch(0.6 0.13 45);          /* #FF7A4D */
   --coral-foreground: oklch(0.99 0.005 85);
-  --leaf: oklch(0.66 0.14 150);          /* #4EA871 */
+  --leaf: oklch(0.55 0.08 160);          /* #4EA871 */
   --leaf-foreground: oklch(0.99 0.005 85);
-  --sky: oklch(0.62 0.17 250);           /* #2F80ED */
+  --sky: oklch(0.55 0.08 235);           /* #2F80ED */
   --sky-foreground: oklch(0.99 0.005 85);
-  --sun: oklch(0.86 0.14 90);            /* #F4C95D */
+  --sun: oklch(0.82 0.11 80);            /* #F4C95D */
   --sun-foreground: var(--ink);
 
   --chart-1: var(--coral);
@@ -140,9 +140,8 @@
 
 @utility bg-hero-gradient {
   background:
-    radial-gradient(ellipse 80% 60% at 20% 10%, color-mix(in oklab, var(--sun) 40%, transparent), transparent 60%),
-    radial-gradient(ellipse 70% 50% at 90% 20%, color-mix(in oklab, var(--coral) 35%, transparent), transparent 60%),
-    radial-gradient(ellipse 60% 60% at 50% 100%, color-mix(in oklab, var(--leaf) 25%, transparent), transparent 60%),
+    radial-gradient(ellipse 70% 60% at 85% 0%, color-mix(in oklab, var(--sun) 22%, transparent), transparent 65%),
+    radial-gradient(ellipse 60% 50% at 0% 100%, color-mix(in oklab, var(--leaf) 14%, transparent), transparent 60%),
     var(--cream);
 }
 
@@ -163,11 +162,11 @@
 }
 
 :root {
-  --planner-green: oklch(0.36 0.077 161);
+  --planner-green: oklch(0.34 0.055 165);
   --planner-on-green: oklch(0.99 0.007 150);
   --planner-mint: oklch(0.93 0.038 157);
-  --planner-wash: oklch(0.978 0.009 155);
-  --planner-orange: oklch(0.46 0.112 41);
+  --planner-wash: oklch(0.975 0.008 80);
+  --planner-orange: oklch(0.52 0.12 45);
   --planner-scrim: oklch(0.15 0.031 155);
   --planner-photo-text: oklch(0.99 0.008 93);
 }

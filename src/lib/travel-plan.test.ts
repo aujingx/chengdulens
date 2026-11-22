@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { SAMPLE, readBrief, newPlan, fillPlan, changeWeather, toggleStop, routeStops, dinnerOptions } from "./travel-plan";
+import { SAMPLE, readBrief, newPlan, fillPlan, changeWeather, toggleStop, routeStops, dinnerOptions, recommendStops } from "./travel-plan";
 import { wanderRoute } from "./wander";
 import { computeRoute } from "./tripMath";
 import { useTravelPlan } from "./travel-plan-store";
@@ -39,12 +39,12 @@ test("晴雨选择独立，来回切换保留原景点并取消旧保存标记",
   expect(routeStops(changeWeather(restored, true)).map((p) => p.id)).toEqual(rainIds);
 });
 
-test("漫游路线含一到两站且估算不超过150分钟，雨天只含室内", () => {
+test("漫游路线含二到三站且估算不超过180分钟，雨天只含室内", () => {
   for (const mood of ["tea", "lanes", "indoor"] as const) {
     for (let seed = 0; seed < 6; seed++) {
       const stops = wanderRoute(mood, seed, mood === "indoor");
-      expect(stops.length >= 1 && stops.length <= 2).toBe(true);
-      expect(computeRoute(stops).totalMin <= 150).toBe(true);
+      expect(stops.length >= 2 && stops.length <= 3).toBe(true);
+      expect(computeRoute(stops).totalMin <= 180).toBe(true);
       if (mood === "indoor") expect(stops.every((p) => p.indoor)).toBe(true);
     }
   }
@@ -64,4 +64,16 @@ test("同一草稿保存天气和自选/托管模式，不创建第二份行程"
   useTravelPlan.getState().setEntryMode("plan");
   expect(useTravelPlan.getState().plan?.rain).toBe(true);
   expect(useTravelPlan.getState().plan?.sunnyStops).toEqual(plan.sunnyStops);
+});
+import { isRainy } from "./weather";
+test("下雨自动判断：有降水或雨类天气代码即为雨天", () => {
+  expect(isRainy(0, 0)).toBe(false);
+  expect(isRainy(3, 0)).toBe(false);
+  expect(isRainy(61, 0)).toBe(true);
+  expect(isRainy(2, 0.5)).toBe(true);
+});
+
+test("雨天半日路线不止一站", () => {
+  const brief = readBrief(SAMPLE.zh)!;
+  expect(recommendStops({ ...brief, rain: true }, true).length >= 2).toBe(true);
 });

@@ -3,15 +3,14 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Compass, MapPin, Shuffle, Route as RouteIcon, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PMViewSheet } from "@/components/PMViewSheet";
-import { PlaceImage } from "@/components/PlaceImage";
 import { PlaceDetailSheet } from "@/components/PlaceDetailSheet";
 import { Planner } from "@/components/home/Planner";
 import { WanderMode } from "@/components/home/WanderMode";
+import { useAutoWeather } from "@/components/home/WeatherPill";
 import { useApp } from "@/lib/store";
 import { useTravelPlan } from "@/lib/travel-plan-store";
 import { newPlan, readBrief, SAMPLE } from "@/lib/travel-plan";
 import { findPlace } from "@/data/places";
-import jinliPhoto from "@/assets/jinli.asset.json";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -32,20 +31,25 @@ function Home() {
   const { entryMode, setEntryMode, setPlan } = useTravelPlan();
   const [openId, setOpenId] = useState<string | null>(null);
   useEffect(() => { void useTravelPlan.persist.rehydrate(); }, []);
+  useAutoWeather();
   const openPlace = openId ? findPlace(openId) ?? null : null;
   const scrollToTrip = () => document.getElementById("trip")?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <div className="bg-planner-wash">
-      <section id="top" className="relative isolate overflow-hidden">
-        <PlaceImage src={jinliPhoto.url} alt={zh ? "成都锦里入口与红灯笼" : "The entrance to Jinli Ancient Street in Chengdu"} className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-planner-scrim/50" />
-        <div className="relative mx-auto flex min-h-[330px] max-w-6xl flex-col justify-center px-5 py-10 text-planner-photo-text sm:min-h-[360px] sm:px-8">
-          <p className="mb-3 flex items-center gap-2 text-sm font-medium"><MapPin className="size-4" />{zh ? "中国 · 成都" : "CHENGDU, CHINA"}</p>
-          <h1 className="font-display text-4xl font-semibold sm:text-6xl">{zh ? "成都漫游" : "Chengdu Lens"}</h1>
-          <p className="mt-4 max-w-lg text-base leading-relaxed sm:text-lg">{zh ? "想随意走走，还是把今天和明天都安排好？" : "A little wandering, or a plan for today and tomorrow?"}</p>
-          <Button variant="outline" className="mt-6 w-fit border-planner-photo-text/50 bg-transparent text-planner-photo-text hover:bg-planner-photo-text hover:text-planner-scrim" onClick={scrollToTrip}>{zh ? "从这里出发" : "Let’s go"}<ArrowRight className="size-4" /></Button>
-          <span className="absolute bottom-4 right-5 text-xs text-planner-photo-text/80 sm:right-8">{zh ? "锦里古街" : "Jinli Ancient Street"}</span>
+      <section id="top" className="border-b border-border/70 bg-hero-gradient">
+        <div className="mx-auto grid max-w-6xl gap-8 px-5 pb-10 pt-12 sm:px-8 sm:pb-14 sm:pt-20 md:grid-cols-[1.4fr_1fr] md:items-end">
+          <div>
+            <p className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-planner-orange"><MapPin className="size-3.5" />{zh ? "中国 · 成都" : "Chengdu, China"}</p>
+            <h1 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl">{zh ? <>慢慢走，<br />成都会给你答案。</> : <>Wander slowly.<br />Chengdu will lead.</>}</h1>
+            <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground sm:text-lg">{zh ? "想随意走走，还是把今天和明天都安排好？天气我们会自动帮你看。" : "A little wandering, or a plan for today and tomorrow? We check the weather for you."}</p>
+            <Button className="mt-7 rounded-full bg-planner-green px-6 text-planner-on-green hover:bg-planner-green/90" onClick={scrollToTrip}>{zh ? "从这里出发" : "Let’s go"}<ArrowRight className="size-4" /></Button>
+          </div>
+          <dl className="grid grid-cols-3 gap-4 border-t border-border/70 pt-5 text-sm md:border-l md:border-t-0 md:pl-8 md:pt-0">
+            {[[zh ? "精选地点" : "Curated places", "9"], [zh ? "半日站点" : "Stops / route", "2–3"], [zh ? "跨城" : "Next day", zh ? "九寨沟" : "Jiuzhai"]].map(([k, v]) => (
+              <div key={k}><dt className="text-xs text-muted-foreground">{k}</dt><dd className="mt-1 font-display text-2xl font-semibold">{v}</dd></div>
+            ))}
+          </dl>
         </div>
       </section>
 

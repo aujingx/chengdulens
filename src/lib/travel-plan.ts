@@ -45,14 +45,14 @@ export function routeStops(plan: Plan): Place[] {
 }
 
 export function recommendStops(brief: Brief, rain: boolean) {
-  const order = rain ? ["chengdu-museum", "fangsuo-bookstore"] : brief.interest === "parks"
+  const order = rain ? ["chengdu-museum", "wenshu-monastery", "fangsuo-bookstore"] : brief.interest === "parks"
     ? ["peoples-park", "wenshu-monastery", "taikoo-li-street-loop"] : brief.interest === "culture"
       ? ["chengdu-museum", "jinli-alley", "fangsuo-bookstore"] : ["taikoo-li-street-loop", "jinli-alley", "fangsuo-bookstore", "peoples-park"];
   const fit: Place[] = [];
   for (const id of order) {
     const place = findPlace(id);
     if (place && computeRoute([...fit, place], brief.start).totalMin <= brief.minutes) fit.push(place);
-    if (fit.length === 2) break;
+    if (fit.length === 3) break;
   }
   return fit.map((place) => place.id);
 }

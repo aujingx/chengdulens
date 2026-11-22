@@ -1,4 +1,7 @@
 import jinliPhoto from "@/assets/jinli.asset.json";
+import fangsuoPhoto from "@/assets/fangsuo.asset.json";
+import pandaPhoto from "@/assets/panda.asset.json";
+import museumPhoto from "@/assets/museum.asset.json";
 
 export type NearbyItem = {
   name: string;
@@ -114,7 +117,7 @@ export const places: Place[] = [
     name: "Chengdu Museum",
     zhName: "成都博物馆",
     image: {
-      url: "https://commons.wikimedia.org/wiki/Special:FilePath/Chengdu_Museum_1.jpg?width=1200",
+      url: museumPhoto.url,
       alt: "Chengdu Museum building",
       source: "Wikimedia Commons",
       sourceUrl: "https://commons.wikimedia.org/wiki/File:Chengdu_Museum_1.jpg",
@@ -226,7 +229,7 @@ export const places: Place[] = [
     operationalAccessibility: "Needs current verification",
     evidenceGrade: "B",
     spiceRisk: "medium",
-    indoor: false,
+    indoor: true,
     photogenic: true,
     demoPersonalFit: 80,
     demoEvidenceConfidence: 68,
@@ -358,10 +361,10 @@ export const places: Place[] = [
     name: "Chengdu Panda Base",
     zhName: "成都大熊猫繁育研究基地",
     image: {
-      url: "https://commons.wikimedia.org/wiki/Special:FilePath/Giant_Panda_at_Chengdu_Panda_Base.jpg?width=1200",
-      alt: "Giant panda at Chengdu Panda Base",
-      source: "Wikimedia Commons / M. Häggström",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Giant_Panda_at_Chengdu_Panda_Base.jpg",
+      url: pandaPhoto.url,
+      alt: "Giant pandas at Chengdu Panda Base",
+      source: "Wikimedia Commons / Colegota · CC BY-SA 2.5",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Chengdu-pandas-d10.jpg",
     },
     category: "Classic Attraction",
     categoryZh: "经典景点",
@@ -532,7 +535,7 @@ export const places: Place[] = [
   },
   {
     id: "fangsuo-bookstore", name: "Fangsuo Bookstore", zhName: "方所书店",
-    image: { url: "", alt: "Fangsuo Bookstore", source: "", sourceUrl: "" },
+    image: { url: fangsuoPhoto.url, alt: "Hallway inside Fangsuo Bookstore, Chengdu", source: "Wikimedia Commons / 来斤小仓鼠吧 · CC BY-SA 4.0", sourceUrl: "https://commons.wikimedia.org/wiki/File:Hallway_in_fangsuo_bookstore,chengdu.jpg" },
     category: "Bookstore", categoryZh: "书店 · 室内", area: "Taikoo Li", duration: 45, distanceFromStartMin: 5,
     tags: ["indoor", "books", "rain backup"], whyFits: "An indoor stop under Taikoo Li on a rainy afternoon.", whyFitsZh: "在太古里地下逛书店，雨天也能慢下来。",
     intro: "Browse books, design objects and the spacious underground reading area at Taikoo Li.", introZh: "在太古里地下逛书籍、设计物件和宽敞的阅读空间。",

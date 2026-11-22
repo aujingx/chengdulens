@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, CloudRain, Sun, Sparkles, ArrowRight, ArrowLeft, Plus, MapPin, Ticket, Bookmark, Wand2 } from "lucide-react";
+import { Check, Sparkles, ArrowRight, ArrowLeft, Plus, MapPin, Ticket, Bookmark, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { BookingPanel } from "@/components/BookingPanel";
@@ -7,10 +7,11 @@ import { PlaceImage } from "@/components/PlaceImage";
 import { useTravelPlan } from "@/lib/travel-plan-store";
 import { computeRoute } from "@/lib/tripMath";
 import {
-  SAMPLE, STEPS, readBrief, newPlan, fillPlan, routeStops, toggleStop, changeWeather, placeOptions, dinnerOptions, getDinner,
+  SAMPLE, STEPS, readBrief, newPlan, fillPlan, routeStops, toggleStop, placeOptions, dinnerOptions, getDinner,
   CHENGDU_HOTELS, JIUZHAI_HOTELS, TRANSFERS, MEALS, optionById, type Plan, type Step, type Option,
 } from "@/lib/travel-plan";
 import { cn } from "@/lib/utils";
+import { WeatherPill } from "./WeatherPill";
 
 type Lang = "en" | "zh";
 const STEP_LABEL: Record<Step, { en: string; zh: string }> = {
@@ -30,7 +31,7 @@ export function Planner({ lang, onOpenPlace }: { lang: Lang; onOpenPlace: (id: s
     const brief = readBrief(text);
     if (!brief) return setError(true);
     setError(false);
-    setPlan(newPlan(brief, mode));
+    setPlan(newPlan({ ...brief, rain: brief.rain || useTravelPlan.getState().weather.rain }, mode));
   }
 
   return (
@@ -77,10 +78,7 @@ function Workbench({ lang, plan, setPlan, onOpenPlace, onBook }: { lang: Lang; p
             {zh ? STEP_LABEL[s].zh : STEP_LABEL[s].en}
           </Button>
         ))}
-        <div className="ml-auto flex rounded-lg border border-border bg-background p-0.5 text-xs" role="group" aria-label={zh ? "天气" : "Weather"}>
-          <Button variant="ghost" size="sm" type="button" aria-pressed={!plan.rain} onClick={() => setPlan(changeWeather(plan, false))} className={cn("inline-flex items-center gap-1 rounded-lg px-2.5 py-1", !plan.rain && "bg-sun/40")}><Sun className="size-3.5" />{zh ? "晴" : "Sunny"}</Button>
-          <Button variant="ghost" size="sm" type="button" aria-pressed={plan.rain} onClick={() => setPlan(changeWeather(plan, true))} className={cn("inline-flex items-center gap-1 rounded-lg px-2.5 py-1", plan.rain && "bg-accent")}><CloudRain className="size-3.5" />{zh ? "雨" : "Rain"}</Button>
-        </div>
+        <WeatherPill lang={lang} className="ml-auto" />
       </div>
 
       <div className="p-4 sm:p-6">

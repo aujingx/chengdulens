@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Shuffle, CloudRain, Sun, ArrowRight, Clock, Footprints } from "lucide-react";
+import { Shuffle, ArrowRight, Clock, Footprints } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type Place } from "@/data/places";
 import { computeRoute } from "@/lib/tripMath";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import { MOODS, wanderRoute } from "@/lib/wander";
 import { useTravelPlan } from "@/lib/travel-plan-store";
+import { WeatherPill } from "./WeatherPill";
 
 export function WanderMode({ lang, onExpand, onOpenPlace }: { lang: "en" | "zh"; onExpand: (stops: Place[], rain: boolean) => void; onOpenPlace: (id: string) => void }) {
   const zh = lang === "zh";
@@ -17,9 +18,10 @@ export function WanderMode({ lang, onExpand, onOpenPlace }: { lang: "en" | "zh";
   const r = computeRoute(stops);
   return (
     <div className="space-y-5">
+      <WeatherPill lang={lang} />
       <div className="flex flex-wrap gap-2">
         {MOODS.map((m) => (
-          <Button variant="outline" aria-pressed={mood === m.id} key={m.id} type="button" onClick={() => { setWander({ mood: m.id, seed: 0, rain: m.id === "indoor" }); }}
+          <Button variant="outline" aria-pressed={mood === m.id} key={m.id} type="button" onClick={() => { setWander({ mood: m.id, seed: 0, rain }); }}
             className={cn("rounded-lg border px-4 py-2 text-sm transition", mood === m.id ? "border-coral bg-coral text-coral-foreground" : "border-border bg-background hover:border-coral/60")}>
             {zh ? m.zh : m.en}
           </Button>
@@ -49,9 +51,7 @@ export function WanderMode({ lang, onExpand, onOpenPlace }: { lang: "en" | "zh";
         </ol>
         <div className="flex flex-wrap gap-2 border-t border-border/60 p-4">
           <Button type="button" variant="outline" size="sm" className="rounded-lg" onClick={() => setWander({ ...wander, seed: seed + 1 })}><Shuffle className="size-4" />{zh ? "换一条" : "Shuffle"}</Button>
-          <Button type="button" variant="outline" size="sm" className="rounded-lg" aria-pressed={rain} onClick={() => setWander({ ...wander, rain: !rain, mood: !rain ? mood : mood === "indoor" ? "tea" : mood })}>
-            {rain ? <Sun className="size-4" /> : <CloudRain className="size-4" />}{rain ? (zh ? "恢复晴天" : "Back to sunny") : (zh ? "下雨了" : "It’s raining")}
-          </Button>
+
           <Button type="button" size="sm" className="ml-auto rounded-lg bg-foreground text-background" onClick={() => onExpand(stops, rain)}>{zh ? "扩展成两日行程" : "Turn into a full trip"}<ArrowRight className="size-4" /></Button>
         </div>
       </div>

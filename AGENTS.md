@@ -13,3 +13,4 @@
 - Resolve booking scope from user actions and typed destination matches, not model tokens, so generated text cannot open unrelated inventory.
 - Keep one browser-persisted planner draft for both manual choices and guided completion, with separate fair-weather and rain stop selections so switching weather is reversible.
 - Keep wander route rules in a browser-safe domain module and persist the entry mode alongside the planner draft so mode switches preserve progress and the rules can be tested without rendering UI.
+- Rain is auto-detected from live Chengdu weather (Open-Meteo) in the browser, with a one-tap override; keep detection rules in src/lib/weather.ts.
