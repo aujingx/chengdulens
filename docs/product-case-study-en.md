@@ -8,7 +8,7 @@
 | **Problem** | Plenty of content, but no quick way to judge personal fit, source quality, and what is practical today. |
 | **Product bet** | A recommendation is more likely to be saved when fit, evidence, and feasibility are visible. |
 | **My role** | Product strategy, user scenarios, Agent and RAG design, UX, and bilingual demo delivery. |
-| **Shipped** | Eight Chengdu places, saves and rain replanning; a continuous bilingual Chengdu-to-Jiuzhaigou journey with destination-scoped booking and simulated refunds. |
+| **Shipped** | Eight Chengdu places, saves and rain replanning; spontaneous walks and a brief-driven planner that asks for time, stay and tomorrow before planning, with an optional Jiuzhaigou day with destination-scoped booking and simulated refunds. |
 | **Next gate** | 5 usability tests and an offline Agent evaluation set before expanding to another city. |
 
 First product loop:
@@ -17,7 +17,7 @@ First product loop:
 Taste Profile -> Trusted Discovery -> Evidence Detail -> Personal Collection -> Half-Day Route -> Local Replan
 ```
 
-[Demo walkthrough](demo-spec-en.md) · [Full product roadmap and validation gates](product-roadmap-en.md)
+[Product spec](product-spec-en.md) · [Demo walkthrough](demo-spec-en.md) · [Full product roadmap and validation gates](product-roadmap-en.md)
 
 ## 2. Problem Definition
 

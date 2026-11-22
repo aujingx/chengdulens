@@ -1,6 +1,6 @@
 # Chengdu Lens · 成都漫游
 
-> 帮第一次来四川的国际自由行游客，把「今天去哪、明天怎么去」变成一段能执行的旅程。
+> 帮第一次来成都的国际自由行游客，按自己的时间和安排，得到一段能执行的路线——两小时随便走走，或今天加明天的完整行程。
 >
 > A bilingual travel concierge prototype for first-time international visitors to Sichuan.
 
@@ -8,12 +8,12 @@
 
 ## 两分钟体验 / Two-minute walkthrough
 
-1. 点「体验行程」，再点「开始行程演示」：从太古里出发，四小时、轻松走、不吃辣。
-2. 点「看看今天的成都预订」：只出现成都订位演示，不会出现外地酒店。
-3. 在同一段对话点「明天去九寨沟」：先看高铁、接驳、过夜与入园如何衔接，再打开当地预订。
-4. 在酒店卡获取模拟报价，试一次「模拟付款成功但订房失败」和退款。官方外链只供自行核对；站内不发起付款或真实预约。
+1. 首页选「随便走走」：告诉它你在哪、什么心情，得到一条 1–3 小时的惊喜路线。
+2. 或选「定制行程」：一句话或点选说明时间、出发地、今晚和明天——没说的不会被替你决定。
+3. 自己一步步挑景点、晚餐、住宿，或「全部听 AI 的」；明天想去九寨沟时再加一天。
+4. 在总览打开当天的预订，试一次「模拟付款成功但订房失败」和退款。站内不发起真实付款或预约。
 
-Start the guided trip, open today's Chengdu booking options, and choose Jiuzhaigou for tomorrow in the same conversation. Open the Jiuzhaigou options to simulate a hotel payment, supplier failure and refund. The preset walkthrough works without live AI; free-text travel questions use live AI when available.
+Pick "Just wander" for a surprise walk from where you are, or "Plan my trip" to state your time, start, tonight and tomorrow — nothing is assumed. Choose stops yourself or let AI fill them, add a Jiuzhaigou day only if you want it, then try the simulated booking failure and refund.
 
 ## 产品取舍 / Product decisions
 
@@ -25,6 +25,7 @@ Start the guided trip, open today's Chengdu booking options, and choose Jiuzhaig
 
 ## 文档 / Documentation
 
+- **[产品规格说明（中文）](docs/product-spec-cn.md)** / **[Product specification](docs/product-spec-en.md)** — 用户场景、原则、信息架构、功能需求、指标与验收标准。
 - **[完整产品蓝图（中文）](docs/product-roadmap-cn.md)** / **[Product strategy and roadmap](docs/product-roadmap-en.md)** — 目标用户、产品边界、阶段规划、指标、风险与上线门槛。
 - [产品案例](docs/product-case-study-cn.md) / [Case study](docs/product-case-study-en.md) — 产品判断与个人职责。
 - [演示验收](docs/demo-spec-cn.md) / [Demo acceptance](docs/demo-spec-en.md) — 可复现的关键路径、异常和双语检查。
@@ -36,7 +37,7 @@ Start the guided trip, open today's Chengdu booking options, and choose Jiuzhaig
 ```sh
 bun install
 bun run dev
-bun test src/lib/journey.test.ts
+bun test
 ```
 
 Built with TanStack Start, React, TypeScript and Tailwind CSS. The guided journey and simulated checkout need no credentials; live chat requires a server-side `LOVABLE_API_KEY`.

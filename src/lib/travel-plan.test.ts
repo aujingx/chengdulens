@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { SAMPLE, readBrief, newPlan, fillPlan, changeWeather, toggleStop, routeStops, dinnerOptions, recommendStops } from "./travel-plan";
+import { SAMPLE, EMPTY_DRAFT, readBrief, readDraft, missingFields, planSteps, setTomorrow, unsupportedPlaces, newPlan, fillPlan, changeWeather, toggleStop, routeStops, dinnerOptions, recommendStops } from "./travel-plan";
 import { wanderRoute } from "./wander";
 import { computeRoute } from "./tripMath";
 import { useTravelPlan } from "./travel-plan-store";
@@ -14,7 +14,42 @@ test("一句话解析成都下午四小时、今晚成都与明天九寨沟", ()
   expect(brief().minutes).toBe(240);
   expect(brief().start).toBe("Taikoo Li");
   expect(brief().noSpice).toBe(true);
-  expect(readBrief("今天成都玩四小时，不去九寨沟")).toBeNull();
+  expect(brief().stayTonight).toBe(true);
+  expect(brief().tomorrow).toBe("jiuzhaigou");
+});
+
+test("用户没说的不替他决定：时间、出发地、今晚、明天都要问", () => {
+  const draft = { ...EMPTY_DRAFT, ...readDraft("下午想出去走走") };
+  expect(missingFields(draft)).toEqual(["minutes", "start", "stayTonight", "tomorrow"]);
+  expect(readBrief("下午想出去走走")).toBeNull();
+  expect(readDraft("今天成都玩四小时，不去九寨沟").tomorrow).toBe("none");
+  expect(readDraft("从文殊院出发两小时").minutes).toBe(120);
+  expect(readDraft("从文殊院出发两小时").start).toBe("Wenshu");
+});
+
+test("只安排今天且已有住处：不出现酒店和九寨沟步骤，托管也不填", () => {
+  const today = readBrief("一整天在市区，从天府广场出发，已经订好酒店，明天还没想好");
+  if (!today) throw new Error("brief should be complete");
+  const plan = newPlan(today, "guided");
+  expect(planSteps(plan)).toEqual(["places", "dinner", "summary"]);
+  expect(plan.chengduHotel).toBeNull();
+  expect(plan.jiuzhaiHotel).toBeNull();
+  expect(plan.transfer).toBeNull();
+});
+
+test("之后再加明天九寨沟，今天的选择保留", () => {
+  const today = readBrief("从太古里出发 4 小时，今晚住成都，只安排今天")!;
+  const picked = toggleStop(newPlan(today, "manual"), "jinli-alley", false);
+  const added = setTomorrow(picked, "jiuzhaigou");
+  expect(planSteps(added).includes("tomorrow")).toBe(true);
+  expect(added.sunnyStops).toEqual(["jinli-alley"]);
+  expect(planSteps(setTomorrow(added, "none")).includes("tomorrow")).toBe(false);
+});
+
+test("漫游路线带入行程，未收录的目的地会被指出", () => {
+  const b = readBrief("从太古里出发 4 小时，今晚住成都，只安排今天")!;
+  expect(newPlan(b, "manual", ["fangsuo-bookstore", "peoples-park"]).sunnyStops.sort()).toEqual(["fangsuo-bookstore", "peoples-park"]);
+  expect(unsupportedPlaces("明天去乐山看大佛")).toEqual(["Leshan"]);
 });
 
 test("托管补全保留用户已选酒店和地点", () => {

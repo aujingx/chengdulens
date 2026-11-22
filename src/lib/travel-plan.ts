@@ -1,36 +1,99 @@
 import { findPlace, places, type Place } from "@/data/places";
 import { computeRoute, legMinutes } from "./tripMath";
 
-export const SAMPLE = {
-  zh: "今天下午从太古里出发，在成都玩 4 小时，不吃辣。今晚住成都，明天去九寨沟，也帮我安排交通、吃饭和住宿。",
-  en: "I have 4 hours in Chengdu this afternoon, starting at Taikoo Li. No spicy food. I’ll stay in Chengdu tonight and go to Jiuzhaigou tomorrow. Help me plan transport, meals and hotels.",
+/** Example sentences shown as optional inspiration; nothing is pre-filled for the traveler. */
+export const EXAMPLES = {
+  zh: [
+    "下午有两小时，从文殊院出发，想喝茶发呆",
+    "今天下午从太古里出发玩 4 小时，不吃辣。今晚住成都，明天去九寨沟",
+    "一整天在市区，已经订好酒店，明天还没想好",
+  ],
+  en: [
+    "Two hours this afternoon from Wenshu, somewhere for tea",
+    "4 hours from Taikoo Li this afternoon, no spicy food. Staying in Chengdu tonight, Jiuzhaigou tomorrow",
+    "A full day in the city, hotel already booked, tomorrow undecided",
+  ],
 };
+export const SAMPLE = { zh: EXAMPLES.zh[1] as string, en: EXAMPLES.en[1] as string };
 
-export type Lang = keyof typeof SAMPLE;
-export type Brief = { text: string; minutes: number; start: string; noSpice: boolean; vegetarian: boolean; rain: boolean; interest: "culture" | "parks" | "city" };
+export type Lang = "en" | "zh";
+export type Start = "Taikoo Li" | "Tianfu Square" | "Wenshu" | "Wuhou";
+export type Tomorrow = "none" | "jiuzhaigou";
+export const STARTS: { id: Start; en: string; zh: string }[] = [
+  { id: "Taikoo Li", en: "Taikoo Li", zh: "太古里" },
+  { id: "Tianfu Square", en: "Tianfu Square", zh: "天府广场" },
+  { id: "Wenshu", en: "Wenshu", zh: "文殊院" },
+  { id: "Wuhou", en: "Wuhou / Jinli", zh: "武侯祠 · 锦里" },
+];
+export const DURATIONS = [{ minutes: 120, en: "2 hours", zh: "2 小时" }, { minutes: 240, en: "Half day · 4h", zh: "半天 · 4 小时" }, { minutes: 480, en: "Full day", zh: "一整天" }];
+export const startLabel = (start: string, lang: Lang) => { const s = STARTS.find((x) => x.id === start); return s ? s[lang] : start; };
+
+export type Brief = {
+  text: string; minutes: number; start: Start; noSpice: boolean; vegetarian: boolean; rain: boolean; interest: "culture" | "parks" | "city";
+  stayTonight: boolean; tomorrow: Tomorrow;
+};
+/** What the traveler has told us so far. `null` means not stated yet — the planner asks instead of assuming. */
+export type Draft = {
+  minutes: number | null; start: Start | null; stayTonight: boolean | null; tomorrow: Tomorrow | null;
+  noSpice: boolean; vegetarian: boolean; rain: boolean; interest: Brief["interest"]; carryStops: string[];
+};
+export const EMPTY_DRAFT: Draft = { minutes: null, start: null, stayTonight: null, tomorrow: null, noSpice: false, vegetarian: false, rain: false, interest: "city", carryStops: [] };
+export type Field = "minutes" | "start" | "stayTonight" | "tomorrow";
+export const REQUIRED: Field[] = ["minutes", "start", "stayTonight", "tomorrow"];
+
 export type Step = "places" | "dinner" | "chengduHotel" | "tomorrow" | "summary";
 export const STEPS: Step[] = ["places", "dinner", "chengduHotel", "tomorrow", "summary"];
 export type Plan = {
   brief: Brief; step: Step; mode: "manual" | "guided"; rain: boolean; sunnyStops: string[]; rainyStops: string[] | null;
   dinner: string | null; chengduHotel: string | null; transfer: string | null; meal: string | null; jiuzhaiHotel: string | null; saved: boolean;
 };
+/** Steps shown for this plan: a hotel step only when staying in Chengdu tonight, a regional step only when the traveler chose one. */
+export const planSteps = (plan: Plan): Step[] => STEPS.filter((s) => (s !== "chengduHotel" || plan.brief.stayTonight) && (s !== "tomorrow" || plan.brief.tomorrow === "jiuzhaigou"));
 
-export function readBrief(text: string): Brief | null {
-  if (!/成都|太古里|chengdu|taikoo li/i.test(text) || !/九寨沟|jiuzhai(?:gou)?\b/i.test(text)) return null;
-  if (/不去九寨沟|(?:not going to|skip|avoid) jiuzhai/i.test(text)) return null;
-  const afternoon = text.match(/下午[^。；\n]{0,55}|[^.!?\n]{0,75}\bafternoon\b[^.!?\n]{0,45}/i)?.[0] ?? text;
-  const hours = afternoon.match(/(\d+(?:\.\d+)?|[一二两三四五六七八九]|one|two|three|four|five|six|seven|eight|nine)\s*(?:个?小时|h(?:ours?|rs?)?\b)/i);
+const UNSUPPORTED: [RegExp, string][] = [
+  [/乐山|leshan/i, "Leshan"], [/峨眉|emei/i, "Emeishan"], [/都江堰|dujiangyan/i, "Dujiangyan"], [/青城山|qingcheng/i, "Qingchengshan"],
+  [/重庆|chongqing/i, "Chongqing"], [/稻城|daocheng/i, "Daocheng"], [/西安|xi.?an\b/i, "Xi’an"], [/上海|shanghai/i, "Shanghai"], [/北京|beijing/i, "Beijing"],
+];
+/** Destinations a traveler named that this demo has no curated content for. */
+export const unsupportedPlaces = (text: string) => UNSUPPORTED.filter(([re]) => re.test(text)).map(([, name]) => name);
+
+/** Reads only what the sentence states. Anything unsaid stays `undefined` so the UI can ask. */
+export function readDraft(text: string): Partial<Draft> {
+  const out: Partial<Draft> = {};
   const words: Record<string, number> = { 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 };
+  const hours = text.match(/(\d+(?:\.\d+)?|[一二两三四五六七八九]|one|two|three|four|five|six|seven|eight|nine)\s*(?:个?小时|h(?:ours?|rs?)?\b)/i);
   const amount = hours?.[1]?.toLowerCase();
-  const start = /(?:从|自)\s*(?:天府广场)|(?:start(?:ing)? (?:at|from)|from) tianfu square/i.test(text) ? "Tianfu Square"
-    : /(?:从|自)\s*(?:文殊院)|(?:start(?:ing)? (?:at|from)|from) wenshu/i.test(text) ? "Wenshu" : "Taikoo Li";
-  return {
-    text, minutes: amount ? Math.max(1, Math.round((words[amount] ?? Number(amount)) * 60)) : 240, start,
-    noSpice: /不吃辣|不辣|不能吃辣|no (?:spicy|chili)|non.spicy|mild food/i.test(text),
-    vegetarian: /素食|吃素|vegetarian|vegan|纯素/i.test(text),
-    rain: /下雨|雨天|rainy|\brain(?:ing)?\b/i.test(text),
-    interest: /公园|喝茶|茶馆|park|tea house/i.test(text) ? "parks" : /古街|历史|博物馆|文化|museum|history|culture|old town/i.test(text) ? "culture" : "city",
-  };
+  if (amount) out.minutes = Math.max(60, Math.min(600, Math.round((words[amount] ?? Number(amount)) * 60)));
+  else if (/一整天|全天|整天|full day|all day|whole day/i.test(text)) out.minutes = 480;
+  else if (/半天|half.?day/i.test(text)) out.minutes = 240;
+  if (/天府广场|tianfu square/i.test(text)) out.start = "Tianfu Square";
+  else if (/文殊院|wenshu/i.test(text)) out.start = "Wenshu";
+  else if (/武侯祠|锦里|wuhou|jinli/i.test(text)) out.start = "Wuhou";
+  else if (/太古里|春熙路|taikoo li|chunxi/i.test(text)) out.start = "Taikoo Li";
+  if (/已(?:经)?订(?:好)?(?:了)?酒店|有住处|不用(?:订|找)?(?:酒店|住宿)|不需要(?:酒店|住宿)|(?:already|have) (?:booked )?(?:a |my )?hotel|hotel (?:is )?(?:already )?booked|no hotel needed/i.test(text)) out.stayTonight = false;
+  else if (/(?:今晚|晚上)住(?:在)?成都|住一晚|帮我(?:订|找|选)(?:个)?酒店|stay(?:ing)? (?:in chengdu )?tonight|hotel (?:for )?tonight|need a hotel/i.test(text)) out.stayTonight = true;
+  if (/不去九寨|(?:not going to|skip|avoid|no) jiuzhai/i.test(text)) out.tomorrow = "none";
+  else if (/九寨|jiuzhai/i.test(text)) out.tomorrow = "jiuzhaigou";
+  else if (/明天(?:还)?没想好|明天(?:再说|自由|不安排)|只(?:安排|玩)今天|tomorrow (?:is )?(?:undecided|open|free)|just today|only today/i.test(text)) out.tomorrow = "none";
+  if (/不吃辣|不辣|不能吃辣|no (?:spicy|chili)|non.spicy|mild food/i.test(text)) out.noSpice = true;
+  if (/素食|吃素|vegetarian|vegan|纯素/i.test(text)) out.vegetarian = true;
+  if (/下雨|雨天|rainy|\brain(?:ing)?\b/i.test(text)) out.rain = true;
+  if (/公园|喝茶|茶馆|发呆|\bparks?\b|\btea\b/i.test(text)) out.interest = "parks";
+  else if (/古街|历史|博物馆|文化|museum|history|culture|old town/i.test(text)) out.interest = "culture";
+  return out;
+}
+
+export const missingFields = (draft: Draft) => REQUIRED.filter((f) => draft[f] === null);
+
+export function briefFromDraft(draft: Draft, text = ""): Brief | null {
+  const { minutes, start, stayTonight, tomorrow } = draft;
+  if (minutes === null || start === null || stayTonight === null || tomorrow === null) return null;
+  return { text, minutes, start, stayTonight, tomorrow, noSpice: draft.noSpice, vegetarian: draft.vegetarian, rain: draft.rain, interest: draft.interest };
+}
+
+/** A sentence becomes a brief only when it states time, start, tonight and tomorrow. */
+export function readBrief(text: string): Brief | null {
+  return briefFromDraft({ ...EMPTY_DRAFT, ...readDraft(text) }, text);
 }
 
 export function routeStops(plan: Plan): Place[] {
@@ -106,9 +169,11 @@ export const optionById = (options: Option[], id: string | null) => options.find
 export const placeOptions = (rain: boolean) => places.filter((place) => rain ? place.indoor : ["jinli-alley", "taikoo-li-street-loop", "wenshu-monastery", "peoples-park", "chengdu-museum", "fangsuo-bookstore"].includes(place.id))
   .sort((a, b) => Number(b.id === "jinli-alley") - Number(a.id === "jinli-alley") || Number(b.id === "taikoo-li-street-loop") - Number(a.id === "taikoo-li-street-loop"));
 
-export function newPlan(brief: Brief, mode: Plan["mode"]): Plan {
-  const plan: Plan = { brief, mode, step: "places", rain: brief.rain, sunnyStops: [], rainyStops: null, dinner: null,
+export function newPlan(brief: Brief, mode: Plan["mode"], carryStops: string[] = []): Plan {
+  let plan: Plan = { brief, mode, step: "places", rain: brief.rain, sunnyStops: [], rainyStops: null, dinner: null,
     chengduHotel: null, transfer: null, meal: null, jiuzhaiHotel: null, saved: false };
+  if (brief.rain && carryStops.length) plan = { ...plan, rainyStops: [] };
+  for (const id of carryStops) plan = toggleStop(plan, id, false);
   return mode === "guided" ? fillPlan(plan) : plan;
 }
 
@@ -117,8 +182,10 @@ export function fillPlan(plan: Plan): Plan {
     ...plan, mode: "guided", step: "summary", saved: false,
     sunnyStops: plan.rain || plan.sunnyStops.length ? plan.sunnyStops : recommendStops(plan.brief, false),
     rainyStops: plan.rain && !routeStops(plan).length ? recommendStops(plan.brief, true) : plan.rainyStops,
-    chengduHotel: plan.chengduHotel ?? "east", transfer: plan.transfer ?? "bus", meal: plan.meal ?? (plan.brief.vegetarian ? "veg" : "gate"),
-    jiuzhaiHotel: plan.jiuzhaiHotel ?? "holiday",
+    chengduHotel: plan.brief.stayTonight ? plan.chengduHotel ?? "east" : null,
+    ...(plan.brief.tomorrow === "jiuzhaigou"
+      ? { transfer: plan.transfer ?? "bus", meal: plan.meal ?? (plan.brief.vegetarian ? "veg" : "gate"), jiuzhaiHotel: plan.jiuzhaiHotel ?? "holiday" }
+      : { transfer: null, meal: null, jiuzhaiHotel: null }),
   };
   return { ...next, dinner: next.dinner ?? dinnerOptions(next)[0]?.id ?? null };
 }
@@ -135,4 +202,11 @@ export function toggleStop(plan: Plan, id: string, alreadySelected: boolean): Pl
   if (!alreadySelected && computeRoute(next.flatMap((value) => findPlace(value) ?? []), plan.brief.start).totalMin > plan.brief.minutes) return plan;
   if (stops.length !== next.length || (!alreadySelected && stops.some((place) => plan.rain && !place.indoor))) return plan;
   return { ...plan, saved: false, ...(plan.rain ? { rainyStops: next } : { sunnyStops: next }) };
+}
+
+/** Adds or removes the regional day later without discarding today's choices. */
+export function setTomorrow(plan: Plan, tomorrow: Tomorrow): Plan {
+  const next: Plan = { ...plan, saved: false, brief: { ...plan.brief, tomorrow } };
+  if (tomorrow === "none") return { ...next, transfer: null, meal: null, jiuzhaiHotel: null, step: plan.step === "tomorrow" ? "summary" : plan.step };
+  return { ...next, step: "tomorrow" };
 }
