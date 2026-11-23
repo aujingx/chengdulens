@@ -17,16 +17,20 @@ Pick "Just wander" for a surprise walk from where you are, or "Plan my trip" to 
 
 ## 产品取舍 / Product decisions
 
-| 决策 / Decision | 本版交付 / Shipped | 尚未实现 / Not shipped |
+| 决策 / Decision | 本版体验 / Current experience | 演进方向 / Evolution |
 | --- | --- | --- |
-| 先解决决策，再介入交易 / Decisions before transactions | 双语地点资料、收藏、估算路线；按天延续的向导对话 | 实时地图路线、库存和自动购票 |
-| 事实与建议分开 / Separate facts from advice | 人工维护地点记录和核对入口；不编造可用性 | 商业数据授权、自动检索与核验 |
-| 付款不等于预订成功 / Payment ≠ confirmation | 按目的地展示选项，本地模拟确认与退款 | 真实扣款、供应商履约、售后与对账 |
+| 先解决决策，再介入交易 / Decisions before transactions | 双模式入口、明确需求、分步选择、晴雨路线；今天与明天共用草稿 | 实时地图路线、库存和自动购票 |
+| 事实与建议分开 / Separate facts from advice | 人工维护地点记录和核对入口；不编造可用性 | 来源维护与核对日期、证据检索 |
+| 付款不等于预订成功 / Payment ≠ confirmation | 按目的地展示选项，本地模拟确认与退款 | 经核实的供应商接口与可回看的确认流程 |
 
 ## 文档 / Documentation
 
+按「产品判断 → 可开发需求 → 可度量质量」阅读。当前体验、产品演进和验证方案分别标注；目标值是规划目标，观察结果在实际执行后独立记录。
+
+Read from product judgment to implementable requirements and measurable quality. Current experience, evolution and validation protocols are labeled separately; targets are proposed, and observed results are recorded after execution.
+
 - **[产品规格说明（中文）](docs/product-spec-cn.md)** / **[Product specification](docs/product-spec-en.md)** — 用户场景、原则、信息架构、功能需求、指标与验收标准。
-- **[完整产品蓝图（中文）](docs/product-roadmap-cn.md)** / **[Product strategy and roadmap](docs/product-roadmap-en.md)** — 目标用户、产品边界、阶段规划、指标、风险与上线门槛。
+- **[完整产品蓝图（中文）](docs/product-roadmap-cn.md)** / **[Product strategy and roadmap](docs/product-roadmap-en.md)** — 目标用户、产品边界、阶段规划、指标与验证门槛。
 - [产品案例](docs/product-case-study-cn.md) / [Case study](docs/product-case-study-en.md) — 产品判断与个人职责。
 - [演示验收](docs/demo-spec-cn.md) / [Demo acceptance](docs/demo-spec-en.md) — 可复现的关键路径、异常和双语检查。
 - [Agent 设计](docs/agent-system-design-cn.md) / [Agent design](docs/agent-system-design-en.md) — 长期设计，不代表已全部实现。
