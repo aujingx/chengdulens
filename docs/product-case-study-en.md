@@ -1,134 +1,122 @@
-# Chengdu Lens Product Case Study
+# Chengdu Lens · Product case study
 
-## 1. Executive Summary
+> A trip-decision assistant for international independent travelers: say your time, location, stay and next stop, and get a plan you chose, can act on, and know what to verify.
 
-| | |
-|---|---|
-| **Target** | First-time international visitors in Chengdu with limited familiarity with Chinese travel apps. |
-| **Problem** | Plenty of content, but no quick way to judge personal fit, source quality, and what is practical today. |
-| **Product bet** | A recommendation is more likely to be saved when fit, evidence, and feasibility are visible. |
-| **My role** | Product strategy, user scenarios, Agent and RAG design, UX, and bilingual demo delivery. |
-| **Shipped** | Eight Chengdu places, saves and rain replanning; spontaneous walks and a brief-driven planner that asks for time, stay and tomorrow before planning, with an optional Jiuzhaigou day with destination-scoped booking and simulated refunds. |
-| **Next gate** | 5 usability tests and an offline Agent evaluation set before expanding to another city. |
+[Live demo](https://chengdulens.lovable.app) · [Product spec](product-spec-en.md) · [Metrics](product-metrics-en.md) · [Roadmap](product-roadmap-en.md) · [中文](product-case-study-cn.md)
 
-First product loop:
+## 1. Summary
 
-```text
-Taste Profile -> Trusted Discovery -> Evidence Detail -> Personal Collection -> Half-Day Route -> Local Replan
+| Item | Detail |
+| --- | --- |
+| **Target user** | First-time international visitors to Chengdu, staying two to four days, English-first, new to Chinese travel apps |
+| **Core problem** | Plenty of content, but no quick answer to "given my time, place and limits, where next?" |
+| **Product bet** | Advice gets acted on when it explains why it fits, hands facts to official sources, and lets the traveler confirm every step |
+| **My role** | Problem framing, scenario design, requirements and interaction, AI layering and boundaries, metrics, prototype build and bilingual delivery |
+| **Shipped** | Two-mode landing (Just wander / Plan my trip), brief-driven workbench, live weather with rain routes, optional Jiuzhaigou day, destination-scoped simulated booking and refund, bilingual and mobile |
+| **Quality** | 12 rule-level unit tests plus end-to-end walkthroughs in English and Chinese, desktop and mobile |
+
+## 2. Problem
+
+Chengdu has more travel content than anyone can read. For a first-time international visitor the cost is in deciding:
+
+- **Hard to trust**: inspiration, ads and real experiences blur together, mostly in Chinese.
+- **Gap from idea to action**: you want Kuanzhai Alley, but not how it links to the next stop, what to do in rain, or where to eat without spice.
+- **Complex regional links**: Jiuzhaigou is rail → onward transfer → stay near the gate, easily mistaken for one ticket.
+- **Unfamiliar local rules**: real-name reservations, visitor caps, payments and ordering all differ from home.
+
+The opportunity is the **decision layer**: turn places, weather, time and preference into "a day I can actually do", and route key facts to official channels.
+
+## 3. Users and scenarios
+
+Scenarios are split by job, not nationality. The same traveler shifts mindset within a day:
+
+| Scenario | In their words | Cognitive load | Product response |
+| --- | --- | --- | --- |
+| A · Spontaneous walk | "Near Wenshu, two hours, somewhere for tea" | Low: wants surprise, no forms | A 1–3 hour surprise route; shuffle, or carry into a plan |
+| B · Plan today | "Four hours from Taikoo Li, no spicy food" | Medium: must work and taste good | Pick places → 1 of 3 dinners → 1 of 3 hotels if needed |
+| C · Today + a regional day | "Staying in Chengdu tonight, Jiuzhaigou tomorrow" | High: cross-city, overnight, multi-leg | B plus rail, transfer, stay and dinner explained leg by leg |
+
+**Key decision:** all three sit side by side on the landing page; the product picks no default for the traveler.
+
+## 4. Principles
+
+1. **Never decide what the traveler hasn't said.** Time, start, tonight and tomorrow are stated or tapped; ask only for what is missing. Regional destinations appear only once chosen.
+2. **The traveler chooses; AI fills gaps.** Every step can be picked by hand or by "Let AI plan it", which never overwrites existing choices.
+3. **Separate facts from advice.** Prices, schedules, hours and availability point to official sources; rules and curated records own facts, the model owns understanding and explanation.
+4. **Payment is not confirmation.** Payment and booking states are tracked separately, including "paid, but hotel failed → refund".
+5. **Everything is reversible.** Fair-weather and rain picks are stored separately; tomorrow can be added or removed without touching today.
+
+## 5. Experience design
+
+```mermaid
+flowchart LR
+  H["Landing: three ways in"] --> W["Just wander"]
+  H --> P["Plan my trip"]
+  W -->|"Build my day around this"| P
+  P --> B["State or tap: time / start / tonight / tomorrow"]
+  B --> G{"Step by step or Let AI plan it"}
+  G --> S1["Places"] --> S2["Dinner, 1 of 3"] --> S3["Tonight's hotel, 1 of 3*"] --> S4["Tomorrow · Jiuzhaigou*"] --> SUM["Summary"]
+  SUM --> BK["Bookings & official checks (that day only)"]
 ```
 
-[Product spec](product-spec-en.md) · [Demo walkthrough](demo-spec-en.md) · [Full product roadmap and validation gates](product-roadmap-en.md)
+<sub>* only when the traveler asks for it</sub>
 
-## 2. Problem Definition
+- **The first screen answers "what can it do for me"**: three entries open their modes, with no preset duration, stop or destination.
+- **Sentence + taps**: chips light up as you type and can always correct the parse; start buttons stay disabled until all four fields are set, listing what is missing.
+- **Steps follow the brief**: already have a room, no hotel step; no tomorrow, no Jiuzhaigou step.
+- **Weather-aware**: live Chengdu weather switches rain days to indoor and covered places (museum, Fangsuo, Wenshu), with a one-tap correction.
+- **Booking is its own drawer**: only that day's destination, with reviewable transaction state, separate from chat.
 
-Chengdu travel information is already overloaded. For international independent travelers, the real difficulty is not lack of content, but high decision cost:
+## 6. AI and system design
 
-- Content platforms provide abundant inspiration, but authentic experience, promotion, and personal fit are mixed together.
-- Map products are strong at navigation, but rarely explain why a place is worth visiting.
-- OTA products are strong at transactions and complete trips, but deep city discovery can be flattened into standardized routes.
-- General AI can generate itineraries, but often lacks sources, feasibility checks, and uncertainty handling.
+| Layer | Owns | Notes |
+| --- | --- | --- |
+| Deterministic rules | Route time, rain swaps, step generation, AI fill, booking scope, transaction state | Pure modules, unit-tested, reproducible |
+| Curated knowledge | Nine Chengdu places, nearby picks, transport, official links and sources | Every record cites a source |
+| AI language | Open questions, trade-off explanations, culture and communication tips | Answers from curated records and the current conversation |
 
-The product opportunity is therefore not to "generate more travel guides," but to turn scattered places, content, maps, and user preferences into explainable, saveable, and executable city choices.
+**Key trade-offs:**
 
-## 3. Target User
+| Question | Decision | Why |
+| --- | --- | --- |
+| Rules or model for AI fill? | Rules | Stable demo; every pick explains its origin |
+| Booking inside chat? | Separate drawer | Transactions need reviewable state and explicit confirmation |
+| Who sets booking scope? | Traveler actions and explicit input | Generated text never opens unrelated inventory |
+| How many regional routes? | Go deep on Jiuzhaigou first | Prove the full city-plus-region chain, then replicate |
 
-The first version targets international independent travelers who are visiting Chengdu for the first time, staying for two to four days, primarily using English, and hoping to experience local city life while being unfamiliar with Chinese platforms and on-site rules.
+See [Agent system design](agent-system-design-en.md).
 
-The product does not model users crudely by nationality. It uses the following variables:
+## 7. Metrics
 
-- Familiarity with traveling in China
-- Language and Chinese-app capability
-- Booking, payment, navigation, and on-site communication ability
-- Travel motivation: culture, food, urban space, photography, family, Sichuan extension
-- Explicit constraints: time, budget, diet, walking ability, companion relationship
+| Level | Metric | Definition |
+| --- | --- | --- |
+| North star | Actionable plan rate | Travelers who save a summary or open an official check ÷ travelers who start a brief |
+| Diagnostics | Entry rate, brief completion, time to first plan, AI-fill share, wander carry-over, regional add-on | Where people drop off; whether they trust manual or AI-filled plans |
+| Guardrails | Preset scenarios, silent overwrites, booking for an unchosen destination, paid-but-unrefunded | Always 0; any occurrence blocks release |
 
-Domestic first-time visitors, local residents, family travel, photography, shopping, museums, and accessibility-related scenarios are used as stress tests, but they do not expand the first-version target user.
+Definitions, dashboard and events: [Metrics](product-metrics-en.md).
 
-## 4. Jobs to Be Done
+## 8. How it evolved
 
-When I arrive in an unfamiliar city, I want to discover a small number of beautiful, tasty, fun, and photogenic places that genuinely fit my taste, understand the recommendation evidence and risks, and combine my saves into a realistic half-day experience, so I do not need to compare across multiple apps or rely only on popularity lists.
+| Stage | Key decision | Outcome |
+| --- | --- | --- |
+| 1 · Discovery prototype | Start with place discovery and saves | Learned the real blocker is stitching places into a day |
+| 2 · Continuous journey | Merge today and tomorrow into one conversation; scope booking by destination | No more Jiuzhaigou quotes before Jiuzhaigou was mentioned |
+| 3 · Mainline + branches | One-sentence brief → step-by-step workbench, 1-of-3 dinners and hotels, full AI fill | The path shifted from reading content to making decisions |
+| 4 · Two modes | Separate spontaneous wandering from structured planning | Covers both low-effort and high-certainty travel mindsets |
+| 5 · No presumption | Landing and planner use only what the traveler said | Every plan belongs to the traveler |
 
-## 5. Product Strategy
+## 9. What I did
 
-### Product Bet
+- **Framed the problem and scope**: narrowed "travel AI" to the decision layer; chose first-time international visitors and "one city + one regional route" for launch.
+- **Designed the experience**: two-mode entry, brief capture, brief-driven steps, 1-of-3 branches, shared progress between manual and AI fill.
+- **Set AI boundaries**: rules, knowledge and language layers; transactions and booking scope never triggered by the model.
+- **Built measurement**: north star, diagnostics and guardrails, an event schema and release gates.
+- **Shipped the prototype**: front end, rule modules, tests and bilingual content, iterated through walkthroughs.
 
-Whether a user saves and acts on a recommendation depends not only on whether the place is popular, but on three questions:
+## 10. Evolution
 
-1. Why does this place fit me?
-2. Is the supporting evidence trustworthy?
-3. Can I actually complete it today?
-
-### Shipped and not shipped
-
-Shipped: curated places, preferences and saves, route estimates, explicit rain-plan approval and a clearly labeled city-to-region guided journey. Out of scope: actual payment, live inventory or pricing, open-ended nationwide coverage and a user-content community.
-
-## 6. Core Experience
-
-Start with four hours near Taikoo Li: where to walk, what to do if it rains, and how to ask for non-spicy food. Once the traveler chooses Jiuzhaigou, explain tomorrow’s rail, road transfer and overnight plan before opening options for that destination. Chengdu offers a table-request simulation; Jiuzhaigou demonstrates hotel failure and refund. Payment is not confirmation, and the railway station is not the park entrance.
-
-## 7. AI Agent Design
-
-The prototype uses one concierge: free-text chat takes curated records, preferences and conversation context; the guided walkthrough does not depend on the model. Booking scope comes from user actions, not model output. The UI surfaces evidence, risks and outstanding checks, not hidden reasoning. Full RAG, an evidence index, live map/weather adapters and automated feasibility checks are future design, not shipped tools.
-
-[AI Agent System Design](agent-system-design-en.md)
-
-## 8. Data and Trust Model
-
-The recommendation is not a single popularity score. It separates four judgments:
-
-- **Personal Fit**: whether the place fits the current user and current situation.
-- **Evidence Confidence**: whether the evidence is reliable, fresh, and complete.
-- **International Relevance**: whether international travelers can understand it or see distinctive value in it.
-- **Operational Accessibility**: whether language, booking, payment, navigation, and on-site rules are feasible.
-
-Hard constraints are handled as a Gate first and do not participate in weighted compensation. Allergy, safety, opening status, return time, or infeasible booking conflicts lead to exclusion or confirmation, not being overridden by a high fit score.
-
-Data-source strategy:
-
-- Official sources support facts such as opening hours, booking, tickets, and rules.
-- International traveler sources support understanding of cross-cultural interest and friction.
-- Chinese platform links support local relevance and long-tail discovery, but the product does not copy reviews, avatars, usernames, or unauthorized ratings.
-- Information that cannot be confirmed must be marked as needing confirmation.
-
-See [Research & Evidence Appendix](research-evidence-appendix-en.md) for research and evidence details.
-
-## 9. Metrics and Evaluation
-
-### Product Metrics
-
-- Activation: completes Taste Profile and submits a request.
-- Discovery Success: saves at least one place after viewing evidence detail.
-- Trust Engagement: opens sources, checks risks, or reads "not suitable for" conditions.
-- Collection Conversion: generates a route after saving three to four places.
-- Replan Success: accepts a local replacement after conditions change.
-
-### Agent Evaluation
-
-- Constraint pass rate: whether hard-conflict places are correctly excluded.
-- Evidence grounding rate: whether recommendation reasons can be traced to data fields.
-- Clarification quality: whether the Agent asks only when key hard constraints are missing.
-- Replanning stability: whether confirmed choices are preserved and only affected parts are replaced.
-- Red-line failure rate: whether unsupported real-time status, fabricated sources, or non-compliant data use appears.
-
-## 10. Execution Plan
-
-| Phase | Goal | Deliverable |
-|---|---|---|
-| Phase 1 | Validate product judgment | Documents, scenarios, data contract, demo specification |
-| Phase 2 | Build demonstrable demo | Single-page website, local data, 8 places, Ask AI, Case Study |
-| Phase 3 | Add real evidence | Lightweight interviews, usability testing, place source registration |
-| Phase 4 | Explore businessization | Curated Collections, merchant partnerships, Sichuan extension routes |
-
-## 11. Key Trade-Offs
-
-- International travelers instead of all travelers: avoid generic personas and highlight international product judgment.
-- Discovery and saving instead of transactions: validate decision value before considering supply and commercial loops.
-- Single-Agent orchestration instead of multi-Agent: keep responsibilities explainable, evaluable, and demonstrable.
-- Source links instead of copied platform content: reduce compliance risk and increase portfolio credibility.
-
-## 12. Limitations
-
-- Current user scenarios are testable hypotheses, not real interview data.
-- Place data has not yet completed public-level source registration.
-- The demo has no live map, weather, hours or inventory integration.
-- Product value has not yet been validated through real activation rate, save rate, or route conversion rate.
+1. **A second regional route** (Dujiangyan–Qingchengshan or Emei–Leshan) to prove destinations are pluggable.
+2. **Sources with verification dates**: each record carries an owner and check date; stale records switch to "verify".
+3. **Validation loop**: five usability sessions and an offline AI evaluation set as the gate to the next city.
+4. **Live transaction partners**: once guardrails hold at zero, connect hotels or attraction reservations first.
